@@ -1,0 +1,147 @@
+# ===========================
+# LocalLab .gitignore
+# ===========================
+
+# ===========================
+# Java / Maven Backend
+# ===========================
+backend/target/
+backend/*.jar
+backend/*.war
+backend/*.ear
+backend/*.class
+
+# Maven
+backend/.mvn/timing.properties
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/pom.xml.tag
+backend/pom.xml.releaseBackup
+backend/pom.xml.versionsBackup
+backend/pom.xml.next
+backend/release.properties
+
+# ===========================
+# Spring Boot
+# ===========================
+backend/application-local.yml
+backend/application-local.properties
+
+# H2 Database files
+data/
+*.mv.db
+*.trace.db
+*.lock.db
+
+# ===========================
+# Node / React Frontend
+# ===========================
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.cache/
+frontend/.parcel-cache/
+
+# Vite
+frontend/.vite/
+
+# npm/yarn/pnpm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# ===========================
+# Testing & Coverage
+# ===========================
+# JaCoCo (Java coverage)
+backend/jacoco.exec
+backend/target/site/jacoco/
+
+# Vitest / Jest
+frontend/coverage/
+
+# ===========================
+# IDE & Editors
+# ===========================
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+
+# ===========================
+# Operating System
+# ===========================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ===========================
+# Docker
+# ===========================
+# Docker Compose volumes (local data)
+chroma_data/
+
+# ===========================
+# Environment & Secrets
+# ===========================
+.env
+.env.local
+.env.*.local
+*.env
+secrets/
+*.pem
+*.key
+
+# ===========================
+# Logs
+# ===========================
+logs/
+*.log
+spring.log
+
+# ===========================
+# Misc
+# ===========================
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.orig
