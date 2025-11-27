@@ -39,8 +39,8 @@
 		<!-- Coverage Thresholds (95% target for services/controllers) -->
 		<jacoco.line.coverage>0.95</jacoco.line.coverage>
 		<jacoco.branch.coverage>0.85</jacoco.branch.coverage>
-		<!-- Skip coverage check until actual business code exists -->
-		<jacoco.skip.check>true</jacoco.skip.check>
+		<!-- Enable coverage check -->
+		<jacoco.skip.check>false</jacoco.skip.check>
 	</properties>
 	<dependencies>
 		<!-- Spring Boot Starters -->
