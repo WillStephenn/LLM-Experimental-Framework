@@ -59,7 +59,7 @@ public class Document {
      */
     @NotBlank(message = "Content is required")
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "CLOB")
     private String content;
 
     /**
