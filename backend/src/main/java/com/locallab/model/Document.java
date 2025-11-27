@@ -57,6 +57,7 @@ public class Document {
      * <p>Extracted from the uploaded file (PDF or TXT). Stored as a LOB to accommodate large
      * documents. This content is chunked during RAG processing.
      */
+    @NotBlank(message = "Content is required")
     @Lob
     @Column(nullable = false)
     private String content;
