@@ -36,6 +36,9 @@ import lombok.Data;
  * @see com.locallab.model.ExperimentRun
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "embedding_models")
 public class EmbeddingModel {
