@@ -1,6 +1,7 @@
 package com.locallab.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -525,6 +526,71 @@ class ExperimentTest {
             experiment.clearRuns();
 
             assertTrue(experiment.getRuns().isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should remove run from collection and return true")
+        void shouldRemoveRunFromCollectionAndReturnTrue() {
+            Experiment experiment = createValidExperiment();
+            experiment.setId(1L);
+
+            ExperimentRun run1 =
+                    ExperimentRun.builder()
+                            .id(1L)
+                            .experiment(experiment)
+                            .modelName("qwen2.5-coder:7b")
+                            .iteration(1)
+                            .build();
+
+            ExperimentRun run2 =
+                    ExperimentRun.builder()
+                            .id(2L)
+                            .experiment(experiment)
+                            .modelName("codellama:7b")
+                            .iteration(1)
+                            .build();
+
+            experiment.addRun(run1);
+            experiment.addRun(run2);
+            assertEquals(2, experiment.getRuns().size());
+
+            boolean removed = experiment.removeRun(run1);
+
+            assertTrue(removed);
+            assertEquals(1, experiment.getRuns().size());
+            assertFalse(experiment.getRuns().contains(run1));
+            assertTrue(experiment.getRuns().contains(run2));
+        }
+
+        @Test
+        @DisplayName("Should return false when removing run not in collection")
+        void shouldReturnFalseWhenRemovingRunNotInCollection() {
+            Experiment experiment = createValidExperiment();
+            experiment.setId(1L);
+
+            ExperimentRun run1 =
+                    ExperimentRun.builder()
+                            .id(1L)
+                            .experiment(experiment)
+                            .modelName("qwen2.5-coder:7b")
+                            .iteration(1)
+                            .build();
+
+            ExperimentRun runNotAdded =
+                    ExperimentRun.builder()
+                            .id(99L)
+                            .experiment(experiment)
+                            .modelName("other-model")
+                            .iteration(1)
+                            .build();
+
+            experiment.addRun(run1);
+
+            boolean removed = experiment.removeRun(runNotAdded);
+
+            assertFalse(removed);
+            assertEquals(1, experiment.getRuns().size());
+            assertTrue(experiment.getRuns().contains(run1));
         }
     }
 
