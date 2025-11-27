@@ -1,6 +1,8 @@
 # ===========================
 # LocalLab .gitignore
 # ===========================
+# This project is open source. This gitignore ensures no personal data,
+# experimental results, or sensitive information is committed.
 
 # ===========================
 # Java / Maven Backend
@@ -25,12 +27,34 @@ backend/release.properties
 # ===========================
 backend/application-local.yml
 backend/application-local.properties
+backend/src/main/resources/application-local.yml
+backend/src/main/resources/application-local.properties
 
-# H2 Database files
+# ===========================
+# Database Files (H2)
+# ===========================
+# H2 database files contain experiment results and potentially personal data
 data/
+backend/data/
 *.mv.db
 *.trace.db
 *.lock.db
+
+# ===========================
+# Experiment Results & User Data
+# ===========================
+# Experiment outputs may contain personal or sensitive information
+results/
+exports/
+output/
+*.csv
+*.json.export
+
+# Uploaded documents (RAG) may contain personal/proprietary content
+uploads/
+documents/
+backend/uploads/
+backend/documents/
 
 # ===========================
 # Node / React Frontend
@@ -40,6 +64,7 @@ frontend/dist/
 frontend/build/
 frontend/.cache/
 frontend/.parcel-cache/
+node_modules/
 
 # Vite
 frontend/.vite/
@@ -50,6 +75,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 .pnpm-store/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # ===========================
 # Testing & Coverage
@@ -60,12 +88,15 @@ backend/target/site/jacoco/
 
 # Vitest / Jest
 frontend/coverage/
+coverage/
 
 # ===========================
 # IDE & Editors
 # ===========================
 # IntelliJ IDEA
 .idea/
+backend/.idea/
+frontend/.idea/
 *.iml
 *.ipr
 *.iws
@@ -117,6 +148,7 @@ $RECYCLE.BIN/
 # ===========================
 # Docker Compose volumes (local data)
 chroma_data/
+chroma-data/
 
 # ===========================
 # Environment & Secrets
@@ -128,6 +160,13 @@ chroma_data/
 secrets/
 *.pem
 *.key
+*.p12
+*.jks
+*.keystore
+
+# API keys and credentials
+credentials/
+api-keys/
 
 # ===========================
 # Logs
@@ -135,6 +174,17 @@ secrets/
 logs/
 *.log
 spring.log
+backend/logs/
+frontend/logs/
+
+# ===========================
+# Vector Store Data
+# ===========================
+# Chroma embeddings may contain derived data from personal documents
+chroma/
+chromadb/
+vector_store/
+embeddings/
 
 # ===========================
 # Misc
@@ -145,3 +195,27 @@ spring.log
 *.swo
 *.bak
 *.orig
+*.backup
+
+# Archives that might contain exported data
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+
+# ===========================
+# LocalLab Specific
+# ===========================
+# Session data and caches
+.locallab/
+cache/
+.cache/
+
+# Benchmark results (may contain system-specific info)
+benchmarks/
+benchmark-results/
+
+# Any seed or sample data that might be added locally
+seed-data/
+sample-data/
