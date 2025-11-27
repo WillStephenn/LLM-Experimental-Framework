@@ -1,8 +1,34 @@
 # LocalLab - AI Coding Agent Instructions
 
+## CRITICAL: Pre-Task Requirements
+
+**Before starting ANY task, you MUST:**
+
+1. **MUST READ (Mandatory):**
+   - `docs/Specification.md` - Complete architecture, data models, UI design
+   - `docs/API-Contract.md` - DTOs, validation rules, REST endpoints, WebSocket messages
+
+2. **SHOULD READ (Context-Dependent):**
+   - Relevant existing classes before creating new ones
+   - Exception handlers: `LocalLabException`, `GlobalExceptionHandler`, `ErrorResponse`
+   - Any existing services, repositories, or controllers in the affected domain
+
+3. **TEST CASES (Mandatory):**
+   - Every code change MUST include corresponding test cases
+   - No task is complete until all tests pass
+   - No task is complete until `mvn clean verify` passes (backend)
+   - No task is complete until `npm run build` and `npm run test` pass (frontend)
+
+**A task is NOT complete unless:**
+- All existing tests pass
+- New test cases are written for new functionality
+- Code passes checkstyle validation
+- Code compiles without errors
+- Coverage targets are met (95% backend, 80% frontend) - if impossible to test something, document why
+
 ## Project Overview
 
-LocalLab is a local-first LLM experimental framework for benchmarking and comparing models via Ollama. The core workflow: **Task Template → Experiment → N models × M configs × X iterations → Analytics**.
+LocalLab is a local-first LLM experimental framework for benchmarking and comparing models via Ollama. The core workflow: **Task Template -> Experiment -> N models x M configs x X iterations -> Analytics**.
 
 **Tech Stack:** Java 21 + Spring Boot 3.x (backend), React 18 + TypeScript + Vite (frontend), H2 database, Ollama (inference), Chroma (vector store).
 
@@ -10,18 +36,18 @@ LocalLab is a local-first LLM experimental framework for benchmarking and compar
 
 ```
 React Frontend (localhost:5173)
-       │ REST API (JSON) + WebSocket (STOMP)
-       ▼
+       | REST API (JSON) + WebSocket (STOMP)
+       v
 Spring Boot Backend (localhost:8080)
-  Controller → Service → Repository
-       │            │
-       ▼            ▼
+  Controller -> Service -> Repository
+       |            |
+       v            v
   OllamaClient  ChromaClient  H2 Database
   (:11434)      (:8000)       (./data/locallab.mv.db)
 ```
 
 **Key Design Principles:**
-- Controller → Service → Repository layering (no shortcuts)
+- Controller -> Service -> Repository layering (no shortcuts)
 - Interfaces for all external clients (`OllamaClient`, `ChromaClient`) to enable testing
 - Fail fast: validate at API boundaries, throw early
 - 95% test coverage target (backend), 80% (frontend)
@@ -31,14 +57,15 @@ Spring Boot Backend (localhost:8080)
 Reference these files for implementation details:
 - `docs/Specification.md` - Complete architecture, data models, UI design, all 8 pages
 - `docs/API-Contract.md` - DTOs, validation rules, REST endpoints, WebSocket messages
-- `docs/ISSUES.md` - 67 sub-issues with dependencies and acceptance criteria
+- `docs/ISSUES.md` - Sub-issues with dependencies and acceptance criteria
 
-# IMPORTANT: Only read-only git interactions are permitted. Do not perform any git write operations (commit, push, branch, merge, etc.) in this project. No updating, modifying or closing issues.
- 
+## IMPORTANT: Git Restrictions
+
+Only read-only git interactions are permitted. Do not perform any git write operations (commit, push, branch, merge, etc.) in this project. No updating, modifying or closing issues.
+
 ## Coding Standards
 
 ### Documentation
-# IMPORTANT: ALWAYS READ DOCUMENTATION BEFORE ANY TASK
 - **Javadoc on all public methods** - Include `@param`, `@return`, `@throws` tags
 - **Docstrings for complex logic** - Explain the "why", not just the "what"
 - **Inline comments** for non-obvious code paths
@@ -47,7 +74,7 @@ Reference these files for implementation details:
 - **Legibility over brevity** - Prefer clear, well-spaced code over dense one-liners
 - **UK English throughout** - Use "colour", "behaviour", "initialise", "serialisation"
 - **Meaningful names** - `experimentRunRepository` not `expRunRepo`
-- **Emoji Ban** - The use of emojis at any level throughout this project is strictly banned.
+- **No emojis** - The use of emojis at any level throughout this project is strictly banned
 
 ### Validation (Spring)
 - **DTOs**: Use `@NotBlank`, `@Size`, `@Min`, `@Max`, `@Pattern` on request fields
@@ -70,18 +97,49 @@ public class TaskTemplateRequest {
 
 ## Backend Conventions
 
-### Package Structure
+### Package Structure (Current State)
 ```
 com.locallab/
-├── controller/    # REST endpoints, @Valid on requests, @ControllerAdvice
+├── config/        # WebConfig, CorsProperties
+├── dto/           # response/ subdirectory (ErrorResponse)
+├── exception/     # LocalLabException, GlobalExceptionHandler
+└── LocalLabApplication.java
+```
+
+### Package Structure (Target)
+```
+com.locallab/
+├── controller/    # REST endpoints, @Valid on requests
 ├── service/       # Business logic, @Transactional
 ├── repository/    # Spring Data JPA interfaces
 ├── model/         # JPA entities + enums/
 ├── dto/           # request/ and response/ subdirectories (validated)
 ├── client/        # OllamaClient, ChromaClient interfaces + impls
-├── config/        # WebConfig, WebSocketConfig, OllamaConfig
+├── config/        # WebConfig, WebSocketConfig, OllamaConfig, CorsProperties
 └── exception/     # LocalLabException, GlobalExceptionHandler
 ```
+
+### Exception Handling (MUST USE)
+The project has established exception handling patterns. Always use these:
+
+**LocalLabException** - Application-specific exceptions with HTTP status:
+```java
+// For specific HTTP status
+throw new LocalLabException("Resource not found", HttpStatus.NOT_FOUND);
+
+// For 500 Internal Server Error (default)
+throw new LocalLabException("Something went wrong");
+
+// With cause
+throw new LocalLabException("Failed to process", cause, HttpStatus.BAD_REQUEST);
+```
+
+**GlobalExceptionHandler** handles:
+- `LocalLabException` - Returns appropriate HTTP status with ErrorResponse
+- `MethodArgumentNotValidException` - Bean validation errors (400)
+- `MethodArgumentTypeMismatchException` - Type conversion errors (400)
+- `NoHandlerFoundException` - Unknown endpoints (404)
+- `Exception` - Catch-all for unexpected errors (500)
 
 ### Entity Patterns
 - All entities use `@Data` (Lombok), `@Entity`, `@Id @GeneratedValue`
@@ -97,7 +155,12 @@ com.locallab/
 | Repository | `@DataJpaTest` with H2 |
 | Client | WireMock for Ollama/Chroma |
 
-**Note** It may be impossible to test some things. Make every effort to test it, but if it proves impossible, it is ok to leave it untested - leave a note however that it was left untested when reporting work done.
+**Coverage Requirements:**
+- Backend: 95% line coverage target
+- Frontend: 80% line coverage target
+- If something proves impossible to test, document the reason in the code
+
+**Note:** It may be impossible to test some things. Make every effort to test it, but if it proves impossible, leave a comment explaining why it was left untested.
 
 ## Frontend Conventions
 
