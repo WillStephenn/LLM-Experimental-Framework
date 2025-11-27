@@ -33,6 +33,8 @@ Reference these files for implementation details:
 - `docs/API-Contract.md` - DTOs, validation rules, REST endpoints, WebSocket messages
 - `docs/ISSUES.md` - 67 sub-issues with dependencies and acceptance criteria
 
+# IMPORTANT: Only read-only git interactions are permitted. Do not perform any git write operations (commit, push, branch, merge, etc.) in this project. No updating, modifying or closing issues.
+ 
 ## Coding Standards
 
 ### Documentation
