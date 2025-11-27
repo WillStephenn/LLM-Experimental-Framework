@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<!--
+    LocalLab Checkstyle Suppressions
+    
+    This file contains suppressions for checkstyle rules that should be ignored
+    in specific circumstances. Use sparingly and document the reason for each suppression.
+-->
+<suppressions>
+    <!-- Suppress JavaDoc checks for test classes -->
+    <suppress checks="MissingJavadocType" files=".*Test\.java$"/>
+    <suppress checks="MissingJavadocMethod" files=".*Test\.java$"/>
+    <suppress checks="JavadocStyle" files=".*Test\.java$"/>
+    
+    <!-- Suppress JavaDoc checks for test configuration classes -->
+    <suppress checks="MissingJavadocType" files=".*TestConfig\.java$"/>
+    <suppress checks="MissingJavadocMethod" files=".*TestConfig\.java$"/>
+    
+    <!-- Suppress method length for test methods (setup can be verbose) -->
+    <suppress checks="MethodLength" files=".*Test\.java$"/>
+    
+    <!-- Suppress parameter number for builder patterns and constructors with many fields -->
+    <suppress checks="ParameterNumber" files=".*Builder\.java$"/>
+    
+    <!-- Suppress line length for URLs in JavaDoc -->
+    <suppress checks="LineLength" files=".*\.java$" message=".*http.*"/>
+    
+    <!-- Suppress JavaDoc for Spring Data JPA repository interfaces (methods are self-documenting) -->
+    <suppress checks="MissingJavadocMethod" files=".*Repository\.java$"/>
+    
+    <!-- Suppress JavaDoc for DTOs (fields are self-documenting with validation annotations) -->
+    <suppress checks="MissingJavadocType" files=".*[Dd][Tt][Oo]\.java$"/>
+    <suppress checks="MissingJavadocType" files=".*Request\.java$"/>
+    <suppress checks="MissingJavadocType" files=".*Response\.java$"/>
+    
+    <!-- Suppress for generated sources -->
+    <suppress files="[\\/]target[\\/]" checks=".*"/>
+</suppressions>

@@ -29,6 +29,18 @@
 	<properties>
 		<java.version>21</java.version>
 		<ollama4j.version>1.1.0</ollama4j.version>
+		
+		<!-- Code Quality Tool Versions -->
+		<checkstyle.version>10.21.1</checkstyle.version>
+		<maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+		<jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+		<spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
+		
+		<!-- Coverage Thresholds (95% target for services/controllers) -->
+		<jacoco.line.coverage>0.95</jacoco.line.coverage>
+		<jacoco.branch.coverage>0.85</jacoco.branch.coverage>
+		<!-- Skip coverage check until actual business code exists -->
+		<jacoco.skip.check>true</jacoco.skip.check>
 	</properties>
 	<dependencies>
 		<!-- Spring Boot Starters -->
@@ -108,6 +120,153 @@
 							<artifactId>lombok</artifactId>
 						</path>
 					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			
+			<!-- Checkstyle Plugin - Code Style Enforcement -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>${maven-checkstyle-plugin.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>${checkstyle.version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<configLocation>checkstyle.xml</configLocation>
+					<suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+					<propertyExpansion>config_loc=${project.basedir}</propertyExpansion>
+					<consoleOutput>true</consoleOutput>
+					<failsOnError>true</failsOnError>
+					<violationSeverity>warning</violationSeverity>
+					<includeTestSourceDirectory>false</includeTestSourceDirectory>
+					<sourceDirectories>
+						<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+					</sourceDirectories>
+				</configuration>
+				<executions>
+					<execution>
+						<id>validate</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- JaCoCo Plugin - Code Coverage -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco-maven-plugin.version}</version>
+				<executions>
+					<!-- Prepare agent for test coverage -->
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<!-- Generate coverage report after tests -->
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<!-- Enforce coverage thresholds -->
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<skip>${jacoco.skip.check}</skip>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>${jacoco.line.coverage}</minimum>
+										</limit>
+										<limit>
+											<counter>BRANCH</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>${jacoco.branch.coverage}</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+							<excludes>
+								<!-- Exclude main application class -->
+								<exclude>com/locallab/LocalLabApplication.class</exclude>
+								<!-- Exclude configuration classes -->
+								<exclude>com/locallab/config/**/*</exclude>
+								<!-- Exclude DTOs (simple data carriers) -->
+								<exclude>com/locallab/dto/**/*</exclude>
+								<!-- Exclude JPA entities (Lombok-generated code) -->
+								<exclude>com/locallab/model/**/*</exclude>
+								<!-- Exclude exception classes -->
+								<exclude>com/locallab/exception/**/*</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- Spotless Plugin - Auto-formatting -->
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>${spotless-maven-plugin.version}</version>
+				<configuration>
+					<java>
+						<!-- Apply Google Java Format -->
+						<googleJavaFormat>
+							<version>1.22.0</version>
+							<style>AOSP</style>
+							<reflowLongStrings>true</reflowLongStrings>
+						</googleJavaFormat>
+						<!-- Remove unused imports -->
+						<removeUnusedImports/>
+						<!-- Import ordering -->
+						<importOrder>
+							<order>java,javax,org,com,</order>
+						</importOrder>
+						<!-- Trim trailing whitespace -->
+						<trimTrailingWhitespace/>
+						<!-- Ensure files end with newline -->
+						<endWithNewline/>
+					</java>
+				</configuration>
+				<executions>
+					<execution>
+						<id>spotless-check</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- Surefire Plugin - Unit Tests -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<includes>
+						<include>**/*Test.java</include>
+						<include>**/*Tests.java</include>
+					</includes>
 				</configuration>
 			</plugin>
 		</plugins>
