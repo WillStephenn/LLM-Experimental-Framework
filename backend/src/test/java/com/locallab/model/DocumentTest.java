@@ -3,6 +3,7 @@ package com.locallab.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -153,8 +154,8 @@ class DocumentTest {
 
             assertNotNull(toString);
             // Lombok @Data generates a toString that includes field names and values
-            assertEquals(true, toString.contains("filename=test.pdf"));
-            assertEquals(true, toString.contains("chunkCount=5"));
+            assertTrue(toString.contains("filename=test.pdf"));
+            assertTrue(toString.contains("chunkCount=5"));
         }
     }
 
