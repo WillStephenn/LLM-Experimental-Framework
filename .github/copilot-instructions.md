@@ -95,6 +95,8 @@ com.locallab/
 | Repository | `@DataJpaTest` with H2 |
 | Client | WireMock for Ollama/Chroma |
 
+**Note** It may be impossible to test some things. Make every effort to test it, but if it proves impossible, it is ok to leave it untested - leave a note however that it was left untested when reporting work done.
+
 ## Frontend Conventions
 
 ### Directory Structure
