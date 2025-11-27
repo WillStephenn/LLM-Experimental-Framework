@@ -61,6 +61,7 @@ class EmbeddingModelTest {
             assertNull(model.getName());
             assertNull(model.getOllamaModelName());
             assertNull(model.getDimensions());
+            assertNull(model.getCreatedAt());
         }
     }
 

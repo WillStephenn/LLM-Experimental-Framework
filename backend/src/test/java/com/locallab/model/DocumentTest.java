@@ -5,17 +5,35 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Set;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+
 /**
  * Unit tests for {@link Document} entity.
  *
- * <p>Tests verify builder pattern, field assignments, default values, and entity construction.
- * Database-level constraints and LOB storage are tested in repository integration tests.
+ * <p>Tests verify builder pattern, field assignments, default values, validation constraints, and
+ * entity construction. Database-level constraints and LOB storage are tested in repository
+ * integration tests.
  */
 class DocumentTest {
+
+    private static Validator validator;
+
+    @BeforeAll
+    static void setUpValidator() {
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            validator = factory.getValidator();
+        }
+    }
 
     @Nested
     @DisplayName("Builder Tests")
@@ -184,5 +202,82 @@ class DocumentTest {
 
             assertEquals(100, document.getChunkCount());
         }
+    }
+
+    @Nested
+    @DisplayName("Validation Tests")
+    class ValidationTests {
+
+        @Test
+        @DisplayName("Should pass validation with valid fields")
+        void shouldPassValidationWithValidFields() {
+            Document document = createValidDocument();
+
+            Set<ConstraintViolation<Document>> violations = validator.validate(document);
+
+            assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should fail validation when filename is blank")
+        void shouldFailValidationWhenFilenameIsBlank() {
+            Document document = createValidDocument();
+            document.setFilename("");
+
+            Set<ConstraintViolation<Document>> violations = validator.validate(document);
+
+            assertEquals(1, violations.size());
+            ConstraintViolation<Document> violation = violations.iterator().next();
+            assertEquals("filename", violation.getPropertyPath().toString());
+            assertEquals("Filename is required", violation.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should fail validation when filename is null")
+        void shouldFailValidationWhenFilenameIsNull() {
+            Document document = createValidDocument();
+            document.setFilename(null);
+
+            Set<ConstraintViolation<Document>> violations = validator.validate(document);
+
+            assertEquals(1, violations.size());
+            ConstraintViolation<Document> violation = violations.iterator().next();
+            assertEquals("filename", violation.getPropertyPath().toString());
+        }
+
+        @Test
+        @DisplayName("Should accept very long filename")
+        void shouldAcceptVeryLongFilename() {
+            Document document = createValidDocument();
+            document.setFilename("a".repeat(500) + ".txt");
+
+            Set<ConstraintViolation<Document>> violations = validator.validate(document);
+
+            assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should accept very long content (LOB field)")
+        void shouldAcceptVeryLongContent() {
+            Document document = createValidDocument();
+            document.setContent("a".repeat(100000));
+
+            Set<ConstraintViolation<Document>> violations = validator.validate(document);
+
+            assertTrue(violations.isEmpty());
+        }
+    }
+
+    /**
+     * Creates a valid Document instance for testing.
+     *
+     * @return a fully populated Document with valid field values
+     */
+    private Document createValidDocument() {
+        Document document = new Document();
+        document.setFilename("test-document.txt");
+        document.setContent("This is test content for the document.");
+        document.setChunkCount(5);
+        return document;
     }
 }

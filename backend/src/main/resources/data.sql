@@ -149,20 +149,20 @@ WHERE NOT EXISTS (SELECT 1 FROM system_prompts WHERE id = 5);
 -- -----------------------------------------------------------------------------
 -- Common embedding models available in Ollama for RAG operations.
 
-INSERT INTO embedding_models (id, name, ollama_model_name, dimensions)
-SELECT 1, 'Nomic Embed Text', 'nomic-embed-text', 768
+INSERT INTO embedding_models (id, name, ollama_model_name, dimensions, created_at)
+SELECT 1, 'Nomic Embed Text', 'nomic-embed-text', 768, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM embedding_models WHERE id = 1);
 
-INSERT INTO embedding_models (id, name, ollama_model_name, dimensions)
-SELECT 2, 'MXBai Embed Large', 'mxbai-embed-large', 1024
+INSERT INTO embedding_models (id, name, ollama_model_name, dimensions, created_at)
+SELECT 2, 'MXBai Embed Large', 'mxbai-embed-large', 1024, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM embedding_models WHERE id = 2);
 
-INSERT INTO embedding_models (id, name, ollama_model_name, dimensions)
-SELECT 3, 'All MiniLM L6 v2', 'all-minilm', 384
+INSERT INTO embedding_models (id, name, ollama_model_name, dimensions, created_at)
+SELECT 3, 'All MiniLM L6 v2', 'all-minilm', 384, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM embedding_models WHERE id = 3);
 
-INSERT INTO embedding_models (id, name, ollama_model_name, dimensions)
-SELECT 4, 'Snowflake Arctic Embed', 'snowflake-arctic-embed', 1024
+INSERT INTO embedding_models (id, name, ollama_model_name, dimensions, created_at)
+SELECT 4, 'Snowflake Arctic Embed', 'snowflake-arctic-embed', 1024, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM embedding_models WHERE id = 4);
 
 -- -----------------------------------------------------------------------------

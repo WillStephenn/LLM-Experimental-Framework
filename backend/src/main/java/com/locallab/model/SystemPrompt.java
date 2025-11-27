@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -48,7 +49,8 @@ public class SystemPrompt {
      * "technical-writer", "json-formatter".
      */
     @NotBlank(message = "Alias is required")
-    @Column(unique = true, nullable = false)
+    @Size(max = 100, message = "Alias must not exceed 100 characters")
+    @Column(unique = true, nullable = false, length = 100)
     private String alias;
 
     /**

@@ -2,6 +2,7 @@ package com.locallab.model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -150,4 +151,41 @@ public class Experiment {
     @Builder.Default
     @OneToMany(mappedBy = "experiment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ExperimentRun> runs = new ArrayList<>();
+
+    /**
+     * Returns an unmodifiable view of the experiment runs.
+     *
+     * <p>This prevents external modification of the internal runs list. To add or remove runs, use
+     * the appropriate mutator methods: {@link #addRun(ExperimentRun)}, {@link
+     * #removeRun(ExperimentRun)}, and {@link #clearRuns()}.
+     *
+     * @return an unmodifiable list of experiment runs
+     */
+    public List<ExperimentRun> getRuns() {
+        return Collections.unmodifiableList(runs);
+    }
+
+    /**
+     * Adds an experiment run to this experiment.
+     *
+     * @param run the experiment run to add
+     */
+    public void addRun(ExperimentRun run) {
+        runs.add(run);
+    }
+
+    /**
+     * Removes an experiment run from this experiment.
+     *
+     * @param run the experiment run to remove
+     * @return true if the run was removed, false otherwise
+     */
+    public boolean removeRun(ExperimentRun run) {
+        return runs.remove(run);
+    }
+
+    /** Clears all experiment runs from this experiment. */
+    public void clearRuns() {
+        runs.clear();
+    }
 }

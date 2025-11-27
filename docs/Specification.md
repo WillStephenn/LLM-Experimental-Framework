@@ -96,8 +96,8 @@ Define a task → Run it across N models × M configurations × X iterations →
 │ name             │       │ name             │
 │ taskTemplateId   │───┐   │ ollamaModelName  │
 │ status           │   │   │ dimensions       │
-│ config (JSON)    │   │   └──────────────────┘
-│ createdAt        │   │
+│ config (JSON)    │   │   │ createdAt        │
+│ createdAt        │   │   └──────────────────┘
 └────────┬─────────┘   │
          │ 1           │
          │             │

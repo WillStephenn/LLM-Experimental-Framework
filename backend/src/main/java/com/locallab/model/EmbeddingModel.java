@@ -1,5 +1,9 @@
 package com.locallab.model;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,7 +13,10 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Represents an embedding model configuration for vector embeddings in RAG operations.
@@ -36,10 +43,10 @@ import lombok.Data;
  * @see com.locallab.model.ExperimentRun
  */
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "embedding_models")
 public class EmbeddingModel {
 
@@ -78,4 +85,13 @@ public class EmbeddingModel {
     @NotNull(message = "Dimensions is required")
     @Column(nullable = false)
     private Integer dimensions;
+
+    /**
+     * Timestamp when this embedding model configuration was created.
+     *
+     * <p>Automatically set by Hibernate on entity creation.
+     */
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 }

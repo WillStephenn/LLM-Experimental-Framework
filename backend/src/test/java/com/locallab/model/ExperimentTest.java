@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -346,7 +347,8 @@ class ExperimentTest {
 
             assertNotNull(experiment.getRuns());
             assertTrue(experiment.getRuns().isEmpty());
-            assertTrue(experiment.getRuns() instanceof ArrayList);
+            // getRuns() returns an unmodifiable view, so check it's a List
+            assertTrue(experiment.getRuns() instanceof List);
         }
     }
 
@@ -497,8 +499,8 @@ class ExperimentTest {
                             .iteration(1)
                             .build();
 
-            experiment.getRuns().add(run1);
-            experiment.getRuns().add(run2);
+            experiment.addRun(run1);
+            experiment.addRun(run2);
 
             assertEquals(2, experiment.getRuns().size());
             assertTrue(experiment.getRuns().contains(run1));
@@ -517,10 +519,10 @@ class ExperimentTest {
                             .iteration(1)
                             .build();
 
-            experiment.getRuns().add(run);
+            experiment.addRun(run);
             assertEquals(1, experiment.getRuns().size());
 
-            experiment.getRuns().clear();
+            experiment.clearRuns();
 
             assertTrue(experiment.getRuns().isEmpty());
         }
