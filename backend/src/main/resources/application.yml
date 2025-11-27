@@ -30,9 +30,15 @@ spring:
       ddl-auto: update
     show-sql: false
     open-in-view: false
+    defer-datasource-initialization: true
     properties:
       hibernate:
         format_sql: true
+
+  # SQL Initialisation (seed data)
+  sql:
+    init:
+      mode: always
 
   # Jackson JSON Configuration
   jackson:
