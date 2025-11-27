@@ -36,6 +36,7 @@ Reference these files for implementation details:
 ## Coding Standards
 
 ### Documentation
+# IMPORTANT: ALWAYS READ DOCUMENTATION BEFORE ANY TASK
 - **Javadoc on all public methods** - Include `@param`, `@return`, `@throws` tags
 - **Docstrings for complex logic** - Explain the "why", not just the "what"
 - **Inline comments** for non-obvious code paths
@@ -44,6 +45,7 @@ Reference these files for implementation details:
 - **Legibility over brevity** - Prefer clear, well-spaced code over dense one-liners
 - **UK English throughout** - Use "colour", "behaviour", "initialise", "serialisation"
 - **Meaningful names** - `experimentRunRepository` not `expRunRepo`
+- **Emoji Ban** - The use of emojis at any level throughout this project is strictly banned.
 
 ### Validation (Spring)
 - **DTOs**: Use `@NotBlank`, `@Size`, `@Min`, `@Max`, `@Pattern` on request fields
