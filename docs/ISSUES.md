@@ -20,8 +20,8 @@ This document outlines all issues required to build the LocalLab application. Is
 - `parallel` - Can be developed in parallel with siblings
 
 ### Dependency Legend
-- ⬅️ **Depends on**: Must wait for specified issue(s)
-- 🔀 **Parallel**: Can be developed alongside other parallel issues
+- **Depends on**: Must wait for specified issue(s)
+-  **Parallel**: Can be developed alongside other parallel issues
 - 🚀 **Starter**: No dependencies, can begin immediately
 
 ---
@@ -49,7 +49,7 @@ This document outlines all issues required to build the LocalLab application. Is
 
 #### 1.1 Initialize Git Repository and Root Structure
 **Labels**: `child-1`, `infra`  
-**Status**: 🚀 Starter  
+**Status**:  
 **Description**:
 - Create root `locallab/` directory
 - Initialize git repository
@@ -65,7 +65,7 @@ This document outlines all issues required to build the LocalLab application. Is
 
 #### 1.2 Create Docker Compose Configuration
 **Labels**: `child-1`, `infra`  
-**Status**: 🚀 Starter | 🔀 Parallel with 1.3, 1.4  
+**Status**: Parallel with 1.3, 1.4  
 **Description**:
 - Create `docker-compose.yml` at project root
 - Configure Chroma vector database service
@@ -101,7 +101,7 @@ volumes:
 
 #### 1.3 Initialize Spring Boot Backend Project
 **Labels**: `child-1`, `backend`, `infra`  
-**Status**: 🚀 Starter | 🔀 Parallel with 1.2, 1.4  
+**Status**: Parallel with 1.2, 1.4  
 **Description**:
 - Create `backend/` directory structure
 - Initialize Maven project with `pom.xml`
@@ -129,7 +129,7 @@ volumes:
 
 #### 1.4 Initialize React Frontend Project
 **Labels**: `child-1`, `frontend`, `infra`  
-**Status**: 🚀 Starter | 🔀 Parallel with 1.2, 1.3  
+**Status**: Parallel with 1.2, 1.3  
 **Description**:
 - Create `frontend/` directory
 - Initialize Vite + React + TypeScript project
@@ -157,7 +157,7 @@ volumes:
 
 #### 1.5 Configure Backend Code Quality Tools
 **Labels**: `child-1`, `backend`, `infra`  
-**Status**: ⬅️ Depends on: 1.3  
+**Status**: Depends on: 1.3  
 **Description**:
 - Create `checkstyle.xml` with Google Java Style (modified)
 - Configure Checkstyle Maven plugin
@@ -174,7 +174,7 @@ volumes:
 
 #### 1.6 Configure Frontend Code Quality Tools
 **Labels**: `child-1`, `frontend`, `infra`  
-**Status**: ⬅️ Depends on: 1.4  
+**Status**: Depends on: 1.4  
 **Description**:
 - Create `.eslintrc.cjs` with strict TypeScript rules
 - Create `.prettierrc` configuration
@@ -197,7 +197,7 @@ volumes:
 
 #### 1.7 Create Backend Application Configuration
 **Labels**: `child-1`, `backend`  
-**Status**: ⬅️ Depends on: 1.3  
+**Status**: Depends on: 1.3  
 **Description**:
 - Create `application.yml` with default configuration
 - Create `application-dev.yml` with development overrides
@@ -233,7 +233,7 @@ chroma:
 
 #### 1.8 Create Base Exception Handling Structure
 **Labels**: `child-1`, `backend`  
-**Status**: ⬅️ Depends on: 1.3  
+**Status**: Depends on: 1.3  
 **Description**:
 - Create `LocalLabException` base exception class
 - Create `GlobalExceptionHandler` with `@ControllerAdvice`
@@ -261,7 +261,7 @@ chroma:
 
 #### 2.1 Create Enum Definitions
 **Labels**: `child-2`, `backend`  
-**Status**: 🚀 Starter (after Parent 1) | 🔀 Parallel with 2.2-2.8  
+**Status**:  (after Parent 1)Parallel with 2.2-2.8  
 **Description**:
 - Create `ExperimentStatus` enum: `DRAFT`, `RUNNING`, `COMPLETED`, `FAILED`
 - Create `RunStatus` enum: `PENDING`, `RUNNING`, `SUCCESS`, `FAILED`
@@ -278,7 +278,7 @@ chroma:
 
 #### 2.2 Create TaskTemplate Entity
 **Labels**: `child-2`, `backend`  
-**Status**: 🔀 Parallel with 2.1, 2.3-2.8  
+**Status**:  Parallel with 2.1, 2.3-2.8  
 **Description**:
 - Create JPA entity with all fields per specification
 - Add validation annotations (`@NotBlank`, `@Size`, etc.)
@@ -306,7 +306,7 @@ chroma:
 
 #### 2.3 Create SystemPrompt Entity
 **Labels**: `child-2`, `backend`  
-**Status**: 🔀 Parallel with 2.1, 2.2, 2.4-2.8  
+**Status**:  Parallel with 2.1, 2.2, 2.4-2.8  
 **Description**:
 - Create JPA entity for reusable system prompts
 - Add validation annotations
@@ -328,7 +328,7 @@ chroma:
 
 #### 2.4 Create EmbeddingModel Entity
 **Labels**: `child-2`, `backend`  
-**Status**: 🔀 Parallel with 2.1-2.3, 2.5-2.8  
+**Status**:  Parallel with 2.1-2.3, 2.5-2.8  
 **Description**:
 - Create JPA entity for tracking embedding models
 - Store Ollama model name and vector dimensions
@@ -349,7 +349,7 @@ chroma:
 
 #### 2.5 Create Document Entity
 **Labels**: `child-2`, `backend`  
-**Status**: 🔀 Parallel with 2.1-2.4, 2.6-2.8  
+**Status**:  Parallel with 2.1-2.4, 2.6-2.8  
 **Description**:
 - Create JPA entity for uploaded documents
 - Track filename, content, and chunk count
@@ -372,7 +372,7 @@ chroma:
 
 #### 2.6 Create Experiment Entity
 **Labels**: `child-2`, `backend`  
-**Status**: 🔀 Parallel with 2.1-2.5, 2.7-2.8  
+**Status**:  Parallel with 2.1-2.5, 2.7-2.8  
 **Description**:
 - Create JPA entity for experiments
 - Configure relationship to TaskTemplate (ManyToOne)
@@ -398,7 +398,7 @@ chroma:
 
 #### 2.7 Create ExperimentRun Entity
 **Labels**: `child-2`, `backend`  
-**Status**: 🔀 Parallel with 2.1-2.6, 2.8  
+**Status**:  Parallel with 2.1-2.6, 2.8  
 **Description**:
 - Create JPA entity for individual experiment runs
 - Configure relationships to Experiment, EmbeddingModel, SystemPrompt
@@ -433,7 +433,7 @@ chroma:
 
 #### 2.8 Create Seed Data SQL Script
 **Labels**: `child-2`, `backend`  
-**Status**: ⬅️ Depends on: 2.1-2.7  
+**Status**: Depends on: 2.1-2.7  
 **Description**:
 - Create `data.sql` with sample data
 - Include sample TaskTemplates
@@ -457,7 +457,7 @@ chroma:
 
 #### 3.1 Create TaskTemplateRepository
 **Labels**: `child-3`, `backend`  
-**Status**: 🔀 Parallel with 3.2-3.6  
+**Status**:  Parallel with 3.2-3.6  
 **Description**:
 - Extend `JpaRepository<TaskTemplate, Long>`
 - Add custom query methods for tag filtering
@@ -478,7 +478,7 @@ List<TaskTemplate> findByNameContainingIgnoreCase(String name);
 
 #### 3.2 Create SystemPromptRepository
 **Labels**: `child-3`, `backend`  
-**Status**: 🔀 Parallel with 3.1, 3.3-3.6  
+**Status**:  Parallel with 3.1, 3.3-3.6  
 **Description**:
 - Extend `JpaRepository<SystemPrompt, Long>`
 - Add find by alias method
@@ -496,7 +496,7 @@ Optional<SystemPrompt> findByAlias(String alias);
 
 #### 3.3 Create EmbeddingModelRepository
 **Labels**: `child-3`, `backend`  
-**Status**: 🔀 Parallel with 3.1-3.2, 3.4-3.6  
+**Status**:  Parallel with 3.1-3.2, 3.4-3.6  
 **Description**:
 - Extend `JpaRepository<EmbeddingModel, Long>`
 - Add find by name method
@@ -509,7 +509,7 @@ Optional<SystemPrompt> findByAlias(String alias);
 
 #### 3.4 Create DocumentRepository
 **Labels**: `child-3`, `backend`  
-**Status**: 🔀 Parallel with 3.1-3.3, 3.5-3.6  
+**Status**:  Parallel with 3.1-3.3, 3.5-3.6  
 **Description**:
 - Extend `JpaRepository<Document, Long>`
 - Add find by filename method
@@ -522,7 +522,7 @@ Optional<SystemPrompt> findByAlias(String alias);
 
 #### 3.5 Create ExperimentRepository
 **Labels**: `child-3`, `backend`  
-**Status**: 🔀 Parallel with 3.1-3.4, 3.6  
+**Status**:  Parallel with 3.1-3.4, 3.6  
 **Description**:
 - Extend `JpaRepository<Experiment, Long>`
 - Add find by status method
@@ -545,7 +545,7 @@ List<Experiment> findAllByOrderByCreatedAtDesc();
 
 #### 3.6 Create ExperimentRunRepository
 **Labels**: `child-3`, `backend`  
-**Status**: 🔀 Parallel with 3.1-3.5  
+**Status**:  Parallel with 3.1-3.5  
 **Description**:
 - Extend `JpaRepository<ExperimentRun, Long>`
 - Add find by experiment method
@@ -581,7 +581,7 @@ Double getAverageDuration(@Param("expId") Long experimentId);
 
 #### 4.1 Create OllamaClient Interface
 **Labels**: `child-4`, `backend`  
-**Status**: 🚀 Starter (after Parent 1) | 🔀 Parallel with 4.3, 4.4  
+**Status**:  (after Parent 1)Parallel with 4.3, 4.4  
 **Description**:
 - Define interface for Ollama operations
 - Support dependency injection for testing
@@ -602,7 +602,7 @@ EmbeddingResponse embed(EmbeddingRequest request);
 
 #### 4.2 Implement OllamaClient with ollama4j
 **Labels**: `child-4`, `backend`  
-**Status**: ⬅️ Depends on: 4.1  
+**Status**: Depends on: 4.1  
 **Description**:
 - Implement OllamaClient interface using ollama4j library
 - Handle connection errors gracefully
@@ -619,7 +619,7 @@ EmbeddingResponse embed(EmbeddingRequest request);
 
 #### 4.3 Create DTOs for Ollama Operations
 **Labels**: `child-4`, `backend`  
-**Status**: 🔀 Parallel with 4.1, 4.4  
+**Status**:  Parallel with 4.1, 4.4  
 **Description**:
 - Create request/response DTOs for generation
 - Create request/response DTOs for embedding
@@ -646,7 +646,7 @@ EmbeddingResponse embed(EmbeddingRequest request);
 
 #### 4.4 Create ChromaClient Interface
 **Labels**: `child-4`, `backend`  
-**Status**: 🔀 Parallel with 4.1, 4.3  
+**Status**:  Parallel with 4.1, 4.3  
 **Description**:
 - Define interface for Chroma vector store operations
 - Support collection management
@@ -665,7 +665,7 @@ List<ChromaQueryResult> query(String collection, float[] embedding, int topK);
 
 #### 4.5 Implement ChromaClient with REST API
 **Labels**: `child-4`, `backend`  
-**Status**: ⬅️ Depends on: 4.4  
+**Status**: Depends on: 4.4  
 **Description**:
 - Implement ChromaClient using RestTemplate/WebClient
 - Handle HTTP errors appropriately
@@ -682,7 +682,7 @@ List<ChromaQueryResult> query(String collection, float[] embedding, int topK);
 
 #### 4.6 Create DTOs for Chroma Operations
 **Labels**: `child-4`, `backend`  
-**Status**: 🔀 Parallel with 4.4  
+**Status**:  Parallel with 4.4  
 **Description**:
 - Create DTOs for Chroma documents
 - Create DTOs for query results
@@ -702,7 +702,7 @@ List<ChromaQueryResult> query(String collection, float[] embedding, int topK);
 
 #### 5.1 Create OllamaService
 **Labels**: `child-5`, `backend`  
-**Status**: 🚀 Starter (after Parents 2-4) | 🔀 Parallel with 5.2-5.4  
+**Status**:  (after Parents 2-4)Parallel with 5.2-5.4  
 **Description**:
 - Inject OllamaClient
 - Provide high-level methods for model listing
@@ -725,7 +725,7 @@ GenerationResponse generate(GenerationRequest request);
 
 #### 5.2 Create TaskService
 **Labels**: `child-5`, `backend`  
-**Status**: 🔀 Parallel with 5.1, 5.3-5.4  
+**Status**:  Parallel with 5.1, 5.3-5.4  
 **Description**:
 - CRUD operations for TaskTemplate
 - Variable extraction from prompt templates
@@ -754,7 +754,7 @@ List<TaskTemplate> filterByTag(String tag);
 
 #### 5.3 Create SystemPromptService
 **Labels**: `child-5`, `backend`  
-**Status**: 🔀 Parallel with 5.1-5.2, 5.4  
+**Status**:  Parallel with 5.1-5.2, 5.4  
 **Description**:
 - CRUD operations for SystemPrompt
 - Alias uniqueness validation
@@ -767,7 +767,7 @@ List<TaskTemplate> filterByTag(String tag);
 
 #### 5.4 Create DocumentService (Part 1 - Basic CRUD)
 **Labels**: `child-5`, `backend`  
-**Status**: 🔀 Parallel with 5.1-5.3  
+**Status**:  Parallel with 5.1-5.3  
 **Description**:
 - Upload document (PDF/TXT support)
 - Store document content in database
@@ -783,7 +783,7 @@ List<TaskTemplate> filterByTag(String tag);
 
 #### 5.5 Create RagService
 **Labels**: `child-5`, `backend`  
-**Status**: ⬅️ Depends on: 5.4, 4.2, 4.5  
+**Status**: Depends on: 5.4, 4.2, 4.5  
 **Description**:
 - Document chunking logic (configurable size/overlap)
 - Embedding generation via Ollama
@@ -809,7 +809,7 @@ String buildContext(List<RetrievedChunk> chunks);
 
 #### 5.6 Create ExperimentService
 **Labels**: `child-5`, `backend`  
-**Status**: ⬅️ Depends on: 5.1-5.3  
+**Status**: Depends on: 5.1-5.3  
 **Description**:
 - CRUD operations for Experiment
 - Experiment configuration validation
@@ -837,7 +837,7 @@ void updateStatus(Long id, ExperimentStatus status);
 
 #### 5.7 Create ExperimentExecutorService
 **Labels**: `child-5`, `backend`  
-**Status**: ⬅️ Depends on: 5.1, 5.5, 5.6  
+**Status**: Depends on: 5.1, 5.5, 5.6  
 **Description**:
 - Execute experiment runs asynchronously
 - Generate all run combinations from config
@@ -867,7 +867,7 @@ ExperimentProgress getProgress(Long experimentId);
 
 #### 5.8 Create AnalyticsService
 **Labels**: `child-5`, `backend`  
-**Status**: ⬅️ Depends on: 3.6  
+**Status**: Depends on: 3.6  
 **Description**:
 - Aggregate metrics across experiment runs
 - Calculate averages, min, max for TPS, latency
@@ -898,7 +898,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 6.1 Create WebConfig for CORS
 **Labels**: `child-6`, `backend`  
-**Status**: 🚀 Starter (after Parent 5) | 🔀 Parallel with 6.2-6.10  
+**Status**:  (after Parent 5)Parallel with 6.2-6.10  
 **Description**:
 - Configure CORS for local development
 - Allow all origins in dev profile
@@ -910,7 +910,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 6.2 Create WebSocketConfig
 **Labels**: `child-6`, `backend`  
-**Status**: 🔀 Parallel with 6.1, 6.3-6.10  
+**Status**:  Parallel with 6.1, 6.3-6.10  
 **Description**:
 - Configure STOMP over WebSocket
 - Define message broker
@@ -922,7 +922,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 6.3 Create OllamaController
 **Labels**: `child-6`, `backend`  
-**Status**: 🔀 Parallel with 6.1-6.2, 6.4-6.10  
+**Status**:  Parallel with 6.1-6.2, 6.4-6.10  
 **Description**:
 - `GET /api/ollama/models` - List available models
 - `GET /api/ollama/status` - Check connectivity
@@ -937,7 +937,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 6.4 Create TaskController
 **Labels**: `child-6`, `backend`  
-**Status**: 🔀 Parallel  
+**Status**:  Parallel  
 **Description**:
 - Full REST CRUD for TaskTemplate
 - Search and filter endpoints
@@ -953,7 +953,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 6.5 Create SystemPromptController
 **Labels**: `child-6`, `backend`  
-**Status**: 🔀 Parallel  
+**Status**:  Parallel  
 **Description**:
 - Full REST CRUD for SystemPrompt
 
@@ -968,7 +968,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 6.6 Create DocumentController
 **Labels**: `child-6`, `backend`  
-**Status**: 🔀 Parallel  
+**Status**:  Parallel  
 **Description**:
 - Document upload (multipart)
 - List documents
@@ -987,7 +987,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 6.7 Create ExperimentController
 **Labels**: `child-6`, `backend`  
-**Status**: 🔀 Parallel  
+**Status**:  Parallel  
 **Description**:
 - CRUD for Experiment
 - Execution control endpoints
@@ -1007,7 +1007,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 6.8 Create ResultController
 **Labels**: `child-6`, `backend`  
-**Status**: 🔀 Parallel  
+**Status**:  Parallel  
 **Description**:
 - Get experiment runs
 - Get single run details
@@ -1022,7 +1022,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 6.9 Create AnalyticsController
 **Labels**: `child-6`, `backend`  
-**Status**: 🔀 Parallel  
+**Status**:  Parallel  
 **Description**:
 - Leaderboard data endpoint
 - Model comparison endpoint
@@ -1036,7 +1036,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 6.10 Create ExperimentWebSocketHandler
 **Labels**: `child-6`, `backend`  
-**Status**: ⬅️ Depends on: 6.2  
+**Status**: Depends on: 6.2  
 **Description**:
 - Handle WebSocket connections for experiment progress
 - Broadcast run completion events
@@ -1061,7 +1061,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 7.1 Configure React Router and Layout
 **Labels**: `child-7`, `frontend`  
-**Status**: 🚀 Starter (after Parent 1) | 🔀 Parallel with 7.2-7.4  
+**Status**:  (after Parent 1)Parallel with 7.2-7.4  
 **Description**:
 - Set up React Router v6
 - Create layout component with navigation sidebar
@@ -1087,7 +1087,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 7.2 Create Axios API Client
 **Labels**: `child-7`, `frontend`  
-**Status**: 🔀 Parallel with 7.1, 7.3-7.4  
+**Status**:  Parallel with 7.1, 7.3-7.4  
 **Description**:
 - Configure Axios instance with base URL
 - Add request/response interceptors
@@ -1100,7 +1100,7 @@ Map<String, ModelMetrics> compareModels(Long experimentId);
 
 #### 7.3 Create Zustand Config Store
 **Labels**: `child-7`, `frontend`  
-**Status**: 🔀 Parallel with 7.1-7.2, 7.4  
+**Status**:  Parallel with 7.1-7.2, 7.4  
 **Description**:
 - Global state for model configuration
 - Persist selected model, temperature, etc.
@@ -1131,7 +1131,7 @@ interface ConfigState {
 
 #### 7.4 Create TypeScript Type Definitions
 **Labels**: `child-7`, `frontend`  
-**Status**: 🔀 Parallel with 7.1-7.3  
+**Status**:  Parallel with 7.1-7.3  
 **Description**:
 - Define all API response types
 - Define entity types
@@ -1149,7 +1149,7 @@ interface ConfigState {
 
 #### 7.5 Create ModelSelector Component
 **Labels**: `child-7`, `frontend`  
-**Status**: ⬅️ Depends on: 7.2, 7.4  
+**Status**: Depends on: 7.2, 7.4  
 **Description**:
 - Dropdown populated from `/api/ollama/models`
 - Loading and error states
@@ -1167,7 +1167,7 @@ interface ConfigState {
 
 #### 7.6 Create ConfigPanel Component
 **Labels**: `child-7`, `frontend`  
-**Status**: ⬅️ Depends on: 7.3, 7.5  
+**Status**: Depends on: 7.3, 7.5  
 **Description**:
 - Collapsible panel with all configuration options
 - Model selector
@@ -1190,7 +1190,7 @@ interface ConfigState {
 
 #### 7.7 Create MetricsDisplay Component
 **Labels**: `child-7`, `frontend`  
-**Status**: ⬅️ Depends on: 7.4  
+**Status**: Depends on: 7.4  
 **Description**:
 - Display generation metrics
 - TPS, duration, TTFT
@@ -1203,7 +1203,7 @@ interface ConfigState {
 
 #### 7.8 Create CodeBlock Component
 **Labels**: `child-7`, `frontend`  
-**Status**: 🔀 Parallel  
+**Status**:  Parallel  
 **Description**:
 - Syntax highlighted code display
 - Copy to clipboard button
@@ -1216,7 +1216,7 @@ interface ConfigState {
 
 #### 7.9 Create API Hooks - Ollama
 **Labels**: `child-7`, `frontend`  
-**Status**: ⬅️ Depends on: 7.2, 7.4  
+**Status**: Depends on: 7.2, 7.4  
 **Description**:
 - `useOllamaModels` - Fetch and cache model list
 - `useOllamaStatus` - Check connectivity
@@ -1228,7 +1228,7 @@ interface ConfigState {
 
 #### 7.10 Create API Hooks - Tasks & Prompts
 **Labels**: `child-7`, `frontend`  
-**Status**: ⬅️ Depends on: 7.2, 7.4  
+**Status**: Depends on: 7.2, 7.4  
 **Description**:
 - `useTasks` - CRUD operations for TaskTemplate
 - `useSystemPrompts` - CRUD for SystemPrompt
@@ -1243,7 +1243,7 @@ interface ConfigState {
 
 #### 7.11 Create API Hooks - Experiments
 **Labels**: `child-7`, `frontend`  
-**Status**: ⬅️ Depends on: 7.2, 7.4  
+**Status**: Depends on: 7.2, 7.4  
 **Description**:
 - `useExperiments` - CRUD operations
 - `useExperimentRuns` - Fetch runs for experiment
@@ -1257,7 +1257,7 @@ interface ConfigState {
 
 #### 7.12 Create WebSocket Hook
 **Labels**: `child-7`, `frontend`  
-**Status**: ⬅️ Depends on: 7.4  
+**Status**: Depends on: 7.4  
 **Description**:
 - `useExperimentWebSocket` - Connect to experiment progress
 - Handle reconnection
@@ -1277,7 +1277,7 @@ interface ConfigState {
 
 #### 8.1 Implement Sandbox Page - Basic Chat
 **Labels**: `child-8`, `frontend`  
-**Status**: 🚀 Starter (after Parent 7) | 🔀 Parallel with other 8.x  
+**Status**:  (after Parent 7)Parallel with other 8.x  
 **Description**:
 - Chat interface with message history
 - Input area with send button
@@ -1297,7 +1297,7 @@ interface ConfigState {
 
 #### 8.2 Implement Sandbox Page - Advanced Features
 **Labels**: `child-8`, `frontend`  
-**Status**: ⬅️ Depends on: 8.1  
+**Status**: Depends on: 8.1  
 **Description**:
 - JSON mode toggle
 - Code syntax highlighting in responses
@@ -1314,7 +1314,7 @@ interface ConfigState {
 
 #### 8.3 Implement Arena Page - Layout
 **Labels**: `child-8`, `frontend`  
-**Status**: 🔀 Parallel  
+**Status**:  Parallel  
 **Description**:
 - Two-column split view
 - Independent model selector per column
@@ -1327,7 +1327,7 @@ interface ConfigState {
 
 #### 8.4 Implement Arena Page - Comparison Features
 **Labels**: `child-8`, `frontend`  
-**Status**: ⬅️ Depends on: 8.3  
+**Status**: Depends on: 8.3  
 **Description**:
 - Diff view toggle showing textual differences
 - Human evaluation buttons: "Left wins", "Right wins", "Tie"
@@ -1339,7 +1339,7 @@ interface ConfigState {
 
 #### 8.5 Implement Task Library Page - List View
 **Labels**: `child-8`, `frontend`  
-**Status**: 🔀 Parallel  
+**Status**:  Parallel  
 **Description**:
 - Tabbed view: Task Templates | System Prompts
 - Data table with columns: Name, Tags, Created, Actions
@@ -1353,7 +1353,7 @@ interface ConfigState {
 
 #### 8.6 Implement Task Library Page - Create/Edit Modal
 **Labels**: `child-8`, `frontend`  
-**Status**: ⬅️ Depends on: 8.5  
+**Status**: Depends on: 8.5  
 **Description**:
 - Modal form for creating/editing TaskTemplate
 - Fields: Name, Description, Prompt Template, Tags, Evaluation Notes
@@ -1365,7 +1365,7 @@ interface ConfigState {
 
 #### 8.7 Implement Task Library Page - Import/Export
 **Labels**: `child-8`, `frontend`  
-**Status**: ⬅️ Depends on: 8.5  
+**Status**: Depends on: 8.5  
 **Description**:
 - Export all as JSON button
 - Import from JSON file
@@ -1375,7 +1375,7 @@ interface ConfigState {
 
 #### 8.8 Implement RAG Lab Page - Document Management
 **Labels**: `child-8`, `frontend`  
-**Status**: 🔀 Parallel  
+**Status**:  Parallel  
 **Description**:
 - Document upload area (drag & drop)
 - Document list with chunk count
@@ -1389,7 +1389,7 @@ interface ConfigState {
 
 #### 8.9 Implement RAG Lab Page - Query Interface
 **Labels**: `child-8`, `frontend`  
-**Status**: ⬅️ Depends on: 8.8  
+**Status**: Depends on: 8.8  
 **Description**:
 - Query input
 - Retrieved chunks display (X-Ray panel)
@@ -1401,7 +1401,7 @@ interface ConfigState {
 
 #### 8.10 Implement Experiment Builder Page - Task Selection
 **Labels**: `child-8`, `frontend`  
-**Status**: 🔀 Parallel  
+**Status**:  Parallel  
 **Description**:
 - Step 1: Select Task Template
 - Task template dropdown/search
@@ -1414,7 +1414,7 @@ interface ConfigState {
 
 #### 8.11 Implement Experiment Builder Page - Configuration
 **Labels**: `child-8`, `frontend`  
-**Status**: ⬅️ Depends on: 8.10  
+**Status**: Depends on: 8.10  
 **Description**:
 - Step 2: Context Mode (None/RAG/Full Context)
 - Step 3: Model Pool (multi-select)
@@ -1426,7 +1426,7 @@ interface ConfigState {
 
 #### 8.12 Implement Experiment Builder Page - Pipeline Visualiser
 **Labels**: `child-8`, `frontend`  
-**Status**: ⬅️ Depends on: 8.11  
+**Status**: Depends on: 8.11  
 **Description**:
 - Visual node graph: Task → Context → Model → Output
 - Nodes reflect configuration
@@ -1439,7 +1439,7 @@ interface ConfigState {
 
 #### 8.13 Implement Experiment Runner Page
 **Labels**: `child-8`, `frontend`  
-**Status**: ⬅️ Depends on: 7.12  
+**Status**: Depends on: 7.12  
 **Description**:
 - Experiment queue list
 - Progress dashboard: overall progress bar, current run
@@ -1453,7 +1453,7 @@ interface ConfigState {
 
 #### 8.14 Implement Results Dashboard - Leaderboard
 **Labels**: `child-8`, `frontend`  
-**Status**: 🔀 Parallel  
+**Status**:  Parallel  
 **Description**:
 - Bar charts: Average TPS, Average Latency, Success Rate
 - Filter by experiment, model, embedding
@@ -1467,7 +1467,7 @@ interface ConfigState {
 
 #### 8.15 Implement Results Dashboard - Comparison Matrix & Deep Dive
 **Labels**: `child-8`, `frontend`  
-**Status**: ⬅️ Depends on: 8.14  
+**Status**: Depends on: 8.14  
 **Description**:
 - Pivot table: Rows = Tasks, Columns = Models
 - Truncated output with expand
@@ -1482,7 +1482,7 @@ interface ConfigState {
 
 #### 8.16 Implement Embedding Analyser Page
 **Labels**: `child-8`, `frontend`  
-**Status**: ⬅️ Depends on: 8.9  
+**Status**: Depends on: 8.9  
 **Description**:
 - Document selector
 - Query input
