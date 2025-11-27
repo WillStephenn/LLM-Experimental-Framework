@@ -1,0 +1,71 @@
+# =============================================================================
+# LocalLab - Default Application Configuration
+# =============================================================================
+# This configuration provides sensible defaults for running LocalLab.
+# Use application-dev.yml for development-specific overrides.
+# =============================================================================
+
+spring:
+  application:
+    name: LocalLab
+
+  # H2 Database Configuration (file-based persistence)
+  datasource:
+    url: jdbc:h2:file:./data/locallab
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # H2 Console (accessible at /h2-console)
+  h2:
+    console:
+      enabled: false
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
+  # JPA / Hibernate Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Jackson JSON Configuration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+# Server Configuration
+server:
+  port: 8080
+
+# =============================================================================
+# External Service Configuration
+# =============================================================================
+
+# Ollama Configuration (local LLM inference)
+ollama:
+  base-url: http://localhost:11434
+  timeout-seconds: 120
+
+# Chroma Configuration (vector store for RAG)
+chroma:
+  base-url: http://localhost:8000
+
+# =============================================================================
+# CORS Configuration
+# =============================================================================
+# CORS is configured via WebConfig.java for fine-grained control.
+# In production, restrict allowed origins appropriately.
+
+cors:
+  allowed-origins: http://localhost:5173
+  allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+  allowed-headers: "*"
+  allow-credentials: true
+  max-age: 3600
