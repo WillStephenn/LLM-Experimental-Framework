@@ -63,6 +63,14 @@ Reference these files for implementation details:
 
 Only read-only git interactions are permitted. Do not perform any git write operations (commit, push, branch, merge, etc.) in this project. No updating, modifying or closing issues.
 
+## Sub-Issue Push Workflow
+
+When tasked with pushing sub-issues to the repo, always:
+- Gather existing issues for style reference
+- Convert to UK English
+- Remove enumeration from the title (but maintain it in the label 'child-x')
+- Assign it to WillStephenn
+
 ## Coding Standards
 
 ### Documentation
