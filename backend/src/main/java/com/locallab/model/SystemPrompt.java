@@ -59,7 +59,7 @@ public class SystemPrompt {
      */
     @Lob
     @NotBlank(message = "Content is required")
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "CLOB")
     private String content;
 
     /**
