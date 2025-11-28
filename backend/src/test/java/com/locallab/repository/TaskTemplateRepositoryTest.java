@@ -82,7 +82,7 @@ class TaskTemplateRepositoryTest {
             List<TaskTemplate> results = taskTemplateRepository.findByTagsContaining("code");
 
             assertEquals(1, results.size());
-            assertEquals("Code Review Task", results.get(0).getName());
+            assertEquals("Code Review Task", results.getFirst().getName());
         }
 
         @Test
@@ -91,7 +91,7 @@ class TaskTemplateRepositoryTest {
             List<TaskTemplate> results = taskTemplateRepository.findByTagsContaining("review");
 
             assertEquals(1, results.size());
-            assertEquals("Code Review Task", results.get(0).getName());
+            assertEquals("Code Review Task", results.getFirst().getName());
         }
 
         @Test
@@ -119,7 +119,7 @@ class TaskTemplateRepositoryTest {
             List<TaskTemplate> results = taskTemplateRepository.findByTagsContaining("lang");
 
             assertEquals(1, results.size());
-            assertEquals("Translation Task", results.get(0).getName());
+            assertEquals("Translation Task", results.getFirst().getName());
         }
 
         @Test
@@ -157,7 +157,7 @@ class TaskTemplateRepositoryTest {
             List<TaskTemplate> results = taskTemplateRepository.findByTagsContaining("summary");
 
             assertEquals(1, results.size());
-            assertEquals("Document Summarisation", results.get(0).getName());
+            assertEquals("Document Summarisation", results.getFirst().getName());
         }
 
         @Test
@@ -166,7 +166,7 @@ class TaskTemplateRepositoryTest {
             List<TaskTemplate> results = taskTemplateRepository.findByTagsContaining("quality");
 
             assertEquals(1, results.size());
-            assertEquals("Code Review Task", results.get(0).getName());
+            assertEquals("Code Review Task", results.getFirst().getName());
         }
 
         @Test
@@ -184,7 +184,7 @@ class TaskTemplateRepositoryTest {
             List<TaskTemplate> results = taskTemplateRepository.findByTagsContaining("test-tag");
 
             assertEquals(1, results.size());
-            assertEquals("Special Tags Template", results.get(0).getName());
+            assertEquals("Special Tags Template", results.getFirst().getName());
         }
     }
 
@@ -199,7 +199,7 @@ class TaskTemplateRepositoryTest {
                     taskTemplateRepository.findByNameContainingIgnoreCase("Code Review Task");
 
             assertEquals(1, results.size());
-            assertEquals("Code Review Task", results.get(0).getName());
+            assertEquals("Code Review Task", results.getFirst().getName());
         }
 
         @Test
@@ -220,7 +220,7 @@ class TaskTemplateRepositoryTest {
                     taskTemplateRepository.findByNameContainingIgnoreCase("code review");
 
             assertEquals(1, results.size());
-            assertEquals("Code Review Task", results.get(0).getName());
+            assertEquals("Code Review Task", results.getFirst().getName());
         }
 
         @Test
@@ -230,7 +230,7 @@ class TaskTemplateRepositoryTest {
                     taskTemplateRepository.findByNameContainingIgnoreCase("CODE REVIEW");
 
             assertEquals(1, results.size());
-            assertEquals("Code Review Task", results.get(0).getName());
+            assertEquals("Code Review Task", results.getFirst().getName());
         }
 
         @Test
@@ -240,7 +240,7 @@ class TaskTemplateRepositoryTest {
                     taskTemplateRepository.findByNameContainingIgnoreCase("cOdE rEvIeW");
 
             assertEquals(1, results.size());
-            assertEquals("Code Review Task", results.get(0).getName());
+            assertEquals("Code Review Task", results.getFirst().getName());
         }
 
         @Test
@@ -292,7 +292,7 @@ class TaskTemplateRepositoryTest {
                     taskTemplateRepository.findByNameContainingIgnoreCase("(Special)");
 
             assertEquals(1, results.size());
-            assertEquals("Test (Special) Task - v2.0", results.get(0).getName());
+            assertEquals("Test (Special) Task - v2.0", results.getFirst().getName());
         }
 
         @Test

@@ -112,8 +112,8 @@ class ExperimentRepositoryTest {
                     experimentRepository.findByStatusOrderByCreatedAtDesc(ExperimentStatus.DRAFT);
 
             assertEquals(1, results.size());
-            assertEquals("Draft Experiment", results.get(0).getName());
-            assertEquals(ExperimentStatus.DRAFT, results.get(0).getStatus());
+            assertEquals("Draft Experiment", results.getFirst().getName());
+            assertEquals(ExperimentStatus.DRAFT, results.getFirst().getStatus());
         }
 
         @Test
@@ -123,8 +123,8 @@ class ExperimentRepositoryTest {
                     experimentRepository.findByStatusOrderByCreatedAtDesc(ExperimentStatus.RUNNING);
 
             assertEquals(1, results.size());
-            assertEquals("Running Experiment", results.get(0).getName());
-            assertEquals(ExperimentStatus.RUNNING, results.get(0).getStatus());
+            assertEquals("Running Experiment", results.getFirst().getName());
+            assertEquals(ExperimentStatus.RUNNING, results.getFirst().getStatus());
         }
 
         @Test
@@ -135,8 +135,8 @@ class ExperimentRepositoryTest {
                             ExperimentStatus.COMPLETED);
 
             assertEquals(1, results.size());
-            assertEquals("Completed Experiment", results.get(0).getName());
-            assertEquals(ExperimentStatus.COMPLETED, results.get(0).getStatus());
+            assertEquals("Completed Experiment", results.getFirst().getName());
+            assertEquals(ExperimentStatus.COMPLETED, results.getFirst().getStatus());
         }
 
         @Test
@@ -146,8 +146,8 @@ class ExperimentRepositoryTest {
                     experimentRepository.findByStatusOrderByCreatedAtDesc(ExperimentStatus.FAILED);
 
             assertEquals(1, results.size());
-            assertEquals("Failed Experiment", results.get(0).getName());
-            assertEquals(ExperimentStatus.FAILED, results.get(0).getStatus());
+            assertEquals("Failed Experiment", results.getFirst().getName());
+            assertEquals(ExperimentStatus.FAILED, results.getFirst().getStatus());
         }
 
         @Test
@@ -195,8 +195,8 @@ class ExperimentRepositoryTest {
 
             assertEquals(2, results.size());
             assertTrue(
-                    results.get(0).getCreatedAt().isAfter(results.get(1).getCreatedAt())
-                            || results.get(0)
+                    results.getFirst().getCreatedAt().isAfter(results.get(1).getCreatedAt())
+                            || results.getFirst()
                                     .getCreatedAt()
                                     .isEqual(results.get(1).getCreatedAt()));
         }

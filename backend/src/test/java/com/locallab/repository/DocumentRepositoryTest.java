@@ -50,8 +50,8 @@ class DocumentRepositoryTest {
             List<Document> found = documentRepository.findByFilename("architecture.pdf");
 
             assertEquals(1, found.size());
-            assertEquals("architecture.pdf", found.get(0).getFilename());
-            assertEquals("Architecture content 1", found.get(0).getContent());
+            assertEquals("architecture.pdf", found.getFirst().getFilename());
+            assertEquals("Architecture content 1", found.getFirst().getContent());
         }
 
         @Test
