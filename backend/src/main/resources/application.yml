@@ -38,7 +38,7 @@ spring:
   # SQL Initialisation (seed data)
   sql:
     init:
-      mode: always
+      mode: never
 
   # Jackson JSON Configuration
   jackson:
