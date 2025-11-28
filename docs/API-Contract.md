@@ -271,7 +271,8 @@ Used for creating and updating task templates.
   "id": 1,
   "name": "Nomic Embed Text",
   "ollamaModelName": "nomic-embed-text",
-  "dimensions": 768
+  "dimensions": 768,
+  "createdAt": "2025-11-27T10:00:00Z"
 }
 ```
 
