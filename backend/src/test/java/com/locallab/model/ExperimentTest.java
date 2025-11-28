@@ -176,21 +176,20 @@ class ExperimentTest {
             Experiment experiment = new Experiment();
             TaskTemplate taskTemplate = new TaskTemplate();
             taskTemplate.setId(2L);
-            ArrayList<ExperimentRun> runs = new ArrayList<>();
 
             experiment.setId(99L);
             experiment.setName("Updated Experiment");
             experiment.setTaskTemplate(taskTemplate);
             experiment.setStatus(ExperimentStatus.PAUSED);
             experiment.setConfig("{\"updated\": true}");
-            experiment.setRuns(runs);
 
             assertEquals(99L, experiment.getId());
             assertEquals("Updated Experiment", experiment.getName());
             assertEquals(taskTemplate, experiment.getTaskTemplate());
             assertEquals(ExperimentStatus.PAUSED, experiment.getStatus());
             assertEquals("{\"updated\": true}", experiment.getConfig());
-            assertEquals(runs, experiment.getRuns());
+            // Runs are managed via addRun/removeRun/clearRuns, not setRuns
+            assertNotNull(experiment.getRuns());
         }
 
         @Test
@@ -648,7 +647,7 @@ class ExperimentTest {
         Experiment experiment = new Experiment();
         experiment.setName("LLM Code Review Comparison");
         experiment.setConfig("{\"models\": [\"qwen2.5-coder:7b\"], \"iterations\": 3}");
-        experiment.setRuns(new ArrayList<>());
+        // Runs list is initialised by default, no need to set it
         return experiment;
     }
 }

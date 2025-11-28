@@ -25,10 +25,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Represents a configured experiment that links a task template to execution parameters.
@@ -148,6 +150,7 @@ public class Experiment {
      *
      * <p>The relationship is mapped by the {@code experiment} field in the ExperimentRun entity.
      */
+    @Setter(AccessLevel.NONE)
     @Builder.Default
     @OneToMany(mappedBy = "experiment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ExperimentRun> runs = new ArrayList<>();
@@ -171,6 +174,7 @@ public class Experiment {
      * @param run the experiment run to add
      */
     public void addRun(ExperimentRun run) {
+        run.setExperiment(this);
         runs.add(run);
     }
 
@@ -181,11 +185,16 @@ public class Experiment {
      * @return true if the run was removed, false otherwise
      */
     public boolean removeRun(ExperimentRun run) {
-        return runs.remove(run);
+        if (runs.remove(run)) {
+            run.setExperiment(null);
+            return true;
+        }
+        return false;
     }
 
     /** Clears all experiment runs from this experiment. */
     public void clearRuns() {
+        runs.forEach(run -> run.setExperiment(null));
         runs.clear();
     }
 }
