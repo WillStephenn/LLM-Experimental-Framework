@@ -19,7 +19,7 @@ import com.locallab.model.TaskTemplate;
 /**
  * Integration tests for {@link TaskTemplateRepository}.
  *
- * <p>Uses {@code @DataJpaTest} to configure an in-memory H2 database and auto-configure Spring Data
+ * <p>Uses {@code @DataJpaTest} to configure an in-memory H2 database and autoconfigure Spring Data
  * JPA repositories. Tests verify custom query methods only; standard JPA CRUD operations are not
  * tested as they are already tested by Spring Data JPA.
  *
