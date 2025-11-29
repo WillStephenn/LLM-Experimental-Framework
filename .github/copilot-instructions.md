@@ -84,6 +84,7 @@ When tasked with pushing sub-issues to the repo, always:
 - **UK English throughout** - Use "colour", "behaviour", "initialise", "serialisation"
 - **Meaningful names** - `experimentRunRepository` not `expRunRepo`
 - **No emojis** - The use of emojis at any level throughout this project is strictly banned
+- **Lombok over boilerplate** - Always use Lombok annotations (`@Data`, `@Getter`, `@Setter`, `@Builder`) instead of manual getters, setters, constructors, and other boilerplate
 
 ### Validation (Spring)
 - **DTOs**: Use `@NotBlank`, `@Size`, `@Min`, `@Max`, `@Pattern` on request fields
