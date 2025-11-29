@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Standard error response DTO for consistent JSON error structure across all API endpoints.
@@ -36,23 +34,23 @@ import lombok.Setter;
  * @author William Stephen
  * @see com.locallab.exception.GlobalExceptionHandler
  */
-@Getter
+@Data
 public class ErrorResponse {
 
     /** ISO 8601 timestamp of when the error occurred. */
-    @Setter private Instant timestamp;
+    private Instant timestamp;
 
     /** HTTP status code. */
-    @Setter private int status;
+    private int status;
 
     /** HTTP status reason phrase (e.g., "Bad Request", "Not Found"). */
-    @Setter private String error;
+    private String error;
 
     /** Human-readable error message describing what went wrong. */
-    @Setter private String message;
+    private String message;
 
     /** The request path that triggered the error. */
-    @Setter private String path;
+    private String path;
 
     /** List of field-level validation errors. Empty if not a validation error. */
     private List<FieldError> fieldErrors;
