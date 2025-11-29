@@ -1,7 +1,6 @@
 package com.locallab.client.impl;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -390,11 +389,11 @@ public class OllamaClientImpl implements OllamaClient {
         if (message == null) {
             return true;
         }
-        // Don't retry for invalid model or bad request errors
+        // Don't retry for errors containing both "model" and "not found" (BAD_REQUEST mapping)
+        // or for errors containing "invalid"
         String lowerMessage = message.toLowerCase();
-        return !lowerMessage.contains("model")
-                && !lowerMessage.contains("invalid")
-                && !lowerMessage.contains("not found");
+        return !(lowerMessage.contains("model") && lowerMessage.contains("not found"))
+                && !lowerMessage.contains("invalid");
     }
 
     /**
@@ -472,12 +471,8 @@ public class OllamaClientImpl implements OllamaClient {
          * Executes the operation.
          *
          * @return the result
-         * @throws OllamaBaseException if an Ollama-specific error occurs
-         * @throws IOException if an I/O error occurs
-         * @throws InterruptedException if the operation is interrupted
-         * @throws URISyntaxException if a URI is malformed
+         * @throws Exception if an error occurs during execution
          */
-        T execute()
-                throws OllamaBaseException, IOException, InterruptedException, URISyntaxException;
+        T execute() throws Exception;
     }
 }
