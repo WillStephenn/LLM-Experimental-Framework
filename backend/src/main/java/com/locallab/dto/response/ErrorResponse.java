@@ -29,7 +29,7 @@ import java.util.List;
  * }
  * }</pre>
  *
- * @author LocalLab
+ * @author William Stephen
  * @see com.locallab.exception.GlobalExceptionHandler
  */
 public class ErrorResponse {

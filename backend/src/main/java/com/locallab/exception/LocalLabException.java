@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
  * throw new LocalLabException("Resource not found", HttpStatus.NOT_FOUND);
  * }</pre>
  *
- * @author LocalLab
+ * @author William Stephen
  * @see GlobalExceptionHandler
  */
 public class LocalLabException extends RuntimeException {
