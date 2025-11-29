@@ -255,8 +255,6 @@
 						<include>**/*Test.java</include>
 						<include>**/*Tests.java</include>
 					</includes>
-					<!-- Pass JaCoCo agent arguments to forked test JVM -->
-					<argLine>${argLine}</argLine>
 				</configuration>
 			</plugin>
 		</plugins>
