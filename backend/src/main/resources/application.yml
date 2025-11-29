@@ -66,6 +66,7 @@ ollama:
 # Chroma Configuration (vector store for RAG)
 chroma:
   base-url: http://localhost:8000
+  timeout-seconds: 30
 
 # =============================================================================
 # CORS Configuration
