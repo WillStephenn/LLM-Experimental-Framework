@@ -213,7 +213,7 @@ public class OllamaClientImpl implements OllamaClient {
     private String buildPromptWithSystem(GenerationRequest request) {
         if (request.getSystemPrompt() != null && !request.getSystemPrompt().isBlank()) {
             return request.getSystemPrompt()
-                    + "\n\n---System Prompt End ---\n\n"
+                    + "\n\n"
                     + request.getPrompt();
         }
         return request.getPrompt();
