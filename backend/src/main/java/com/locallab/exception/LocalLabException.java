@@ -2,6 +2,8 @@ package com.locallab.exception;
 
 import org.springframework.http.HttpStatus;
 
+import lombok.Getter;
+
 /**
  * Base exception class for all LocalLab application-specific exceptions.
  *
@@ -14,9 +16,10 @@ import org.springframework.http.HttpStatus;
  * throw new LocalLabException("Resource not found", HttpStatus.NOT_FOUND);
  * }</pre>
  *
- * @author LocalLab
+ * @author William Stephen
  * @see GlobalExceptionHandler
  */
+@Getter
 public class LocalLabException extends RuntimeException {
 
     /** The HTTP status code associated with this exception. */
@@ -64,14 +67,5 @@ public class LocalLabException extends RuntimeException {
      */
     public LocalLabException(String message, Throwable cause) {
         this(message, cause, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    /**
-     * Returns the HTTP status code associated with this exception.
-     *
-     * @return the HTTP status code
-     */
-    public HttpStatus getStatus() {
-        return status;
     }
 }

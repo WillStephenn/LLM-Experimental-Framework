@@ -31,7 +31,7 @@ import jakarta.servlet.http.HttpServletRequest;
  *   <li>{@link Exception} - Catch-all for unexpected errors
  * </ul>
  *
- * @author LocalLab
+ * @author William Stephen
  * @see ErrorResponse
  * @see LocalLabException
  */
