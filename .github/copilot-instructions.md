@@ -112,7 +112,7 @@ public class TaskTemplateRequest {
 com.locallab/
 ├── config/        # WebConfig, CorsProperties
 ├── dto/           # response/ subdirectory (ErrorResponse)
-├── exception/     # LocalLabException, GlobalExceptionHandler
+├── exception/     # GlobalExceptionHandler
 └── LocalLabApplication.java
 ```
 
@@ -126,7 +126,7 @@ com.locallab/
 ├── dto/           # request/ and response/ subdirectories (validated)
 ├── client/        # OllamaClient, ChromaClient interfaces + impls
 ├── config/        # WebConfig, WebSocketConfig, OllamaConfig, CorsProperties
-└── exception/     # LocalLabException, GlobalExceptionHandler
+└── exception/     # GlobalExceptionHandler
 ```
 
 ### Exception Handling (MUST USE)
@@ -162,19 +162,11 @@ throw new ResponseStatusException(
     e);
 ```
 
-**Service Layer (Temporary - LocalLabException still supported):**
-```java
-// LocalLabException is still supported in the service layer for backwards compatibility
-// This will be migrated in a future issue
-throw new LocalLabException("Task not found", HttpStatus.NOT_FOUND);
-```
-
 **GlobalExceptionHandler** handles:
 - `ResponseStatusException` - Returns appropriate HTTP status from exception
 - `EntityNotFoundException` - 404 Not Found
 - `IllegalArgumentException` - 400 Bad Request
 - `IllegalStateException` - 409 Conflict
-- `LocalLabException` - Kept for service layer compatibility (to be removed)
 - `MethodArgumentNotValidException` - Bean validation errors (400)
 - `MethodArgumentTypeMismatchException` - Type conversion errors (400)
 - `NoHandlerFoundException` - Unknown endpoints (404)

@@ -66,6 +66,7 @@ class GlobalExceptionHandlerTest {
             assertEquals("Service Unavailable", response.getBody().getError());
             assertEquals("Ollama service is unavailable", response.getBody().getMessage());
             assertEquals("/api/test", response.getBody().getPath());
+            assertTrue(response.getBody().getFieldErrors().isEmpty());
         }
 
         @Test
