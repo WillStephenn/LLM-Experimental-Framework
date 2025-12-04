@@ -10,7 +10,7 @@
 
 2. **SHOULD READ (Context-Dependent):**
    - Relevant existing classes before creating new ones
-   - Exception handlers: `LocalLabException`, `GlobalExceptionHandler`, `ErrorResponse`
+   - Exception handlers: `GlobalExceptionHandler`, `ErrorResponse`
    - Any existing services, repositories, or controllers in the affected domain
 
 3. **TEST CASES (Jacoco-Driven):**
@@ -112,7 +112,7 @@ public class TaskTemplateRequest {
 com.locallab/
 ├── config/        # WebConfig, CorsProperties
 ├── dto/           # response/ subdirectory (ErrorResponse)
-├── exception/     # LocalLabException, GlobalExceptionHandler
+├── exception/     # GlobalExceptionHandler
 └── LocalLabApplication.java
 ```
 
@@ -126,26 +126,47 @@ com.locallab/
 ├── dto/           # request/ and response/ subdirectories (validated)
 ├── client/        # OllamaClient, ChromaClient interfaces + impls
 ├── config/        # WebConfig, WebSocketConfig, OllamaConfig, CorsProperties
-└── exception/     # LocalLabException, GlobalExceptionHandler
+└── exception/     # GlobalExceptionHandler
 ```
 
 ### Exception Handling (MUST USE)
-The project has established exception handling patterns. Always use these:
+The project uses Spring's standard exceptions for clearer semantics and self-documenting code. Always use these patterns:
 
-**LocalLabException** - Application-specific exceptions with HTTP status:
+**Standard Exceptions by Use Case:**
+
+| Exception | HTTP Status | Use Case |
+|-----------|-------------|----------|
+| `EntityNotFoundException` | 404 | Resource not found (e.g., collection, entity) |
+| `IllegalArgumentException` | 400 | Invalid input or parameter values |
+| `IllegalStateException` | 409 | Conflict (e.g., resource already exists, invalid state transition) |
+| `ResponseStatusException` | Variable | External service errors, connection failures |
+
+**Client Layer Examples (OllamaClient, ChromaClient):**
 ```java
-// For specific HTTP status
-throw new LocalLabException("Resource not found", HttpStatus.NOT_FOUND);
+// For NOT_FOUND errors - use EntityNotFoundException
+throw new EntityNotFoundException("Collection not found: " + name);
 
-// For 500 Internal Server Error (default)
-throw new LocalLabException("Something went wrong");
+// For CONFLICT errors - use IllegalStateException
+throw new IllegalStateException("Collection already exists: " + name);
 
-// With cause
-throw new LocalLabException("Failed to process", cause, HttpStatus.BAD_REQUEST);
+// For SERVICE_UNAVAILABLE or other status codes - use ResponseStatusException
+throw new ResponseStatusException(
+    HttpStatus.SERVICE_UNAVAILABLE,
+    "Cannot connect to Chroma: " + e.getMessage(),
+    e);
+
+// For BAD_REQUEST from external services
+throw new ResponseStatusException(
+    HttpStatus.BAD_REQUEST,
+    "Ollama generate failed: model 'invalid-model' not found",
+    e);
 ```
 
 **GlobalExceptionHandler** handles:
-- `LocalLabException` - Returns appropriate HTTP status with ErrorResponse
+- `ResponseStatusException` - Returns appropriate HTTP status from exception
+- `EntityNotFoundException` - 404 Not Found
+- `IllegalArgumentException` - 400 Bad Request
+- `IllegalStateException` - 409 Conflict
 - `MethodArgumentNotValidException` - Bean validation errors (400)
 - `MethodArgumentTypeMismatchException` - Type conversion errors (400)
 - `NoHandlerFoundException` - Unknown endpoints (404)

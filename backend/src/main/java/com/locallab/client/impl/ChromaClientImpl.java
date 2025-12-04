@@ -22,12 +22,14 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.locallab.client.ChromaClient;
 import com.locallab.config.ChromaConfig;
 import com.locallab.dto.ChromaDocument;
 import com.locallab.dto.ChromaQueryResult;
-import com.locallab.exception.LocalLabException;
+
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Implementation of {@link ChromaClient} using Spring's RestTemplate.
@@ -127,19 +129,19 @@ public class ChromaClientImpl implements ChromaClient {
         } catch (HttpServerErrorException e) {
             LOGGER.error(
                     "Chroma server error while creating collection {}: {}", name, e.getMessage());
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
                     "Chroma service error while creating collection: " + e.getMessage(),
-                    e,
-                    HttpStatus.SERVICE_UNAVAILABLE);
+                    e);
         } catch (ResourceAccessException e) {
             LOGGER.error(
                     "Cannot connect to Chroma while creating collection {}: {}",
                     name,
                     e.getMessage());
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
                     "Cannot connect to Chroma: " + e.getMessage(),
-                    e,
-                    HttpStatus.SERVICE_UNAVAILABLE);
+                    e);
         }
     }
 
@@ -159,26 +161,26 @@ public class ChromaClientImpl implements ChromaClient {
                 return;
             }
             LOGGER.error("Error deleting collection {}: {}", name, e.getMessage());
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.valueOf(e.getStatusCode().value()),
                     "Failed to delete collection: " + e.getMessage(),
-                    e,
-                    HttpStatus.valueOf(e.getStatusCode().value()));
+                    e);
         } catch (HttpServerErrorException e) {
             LOGGER.error(
                     "Chroma server error while deleting collection {}: {}", name, e.getMessage());
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
                     "Chroma service error while deleting collection: " + e.getMessage(),
-                    e,
-                    HttpStatus.SERVICE_UNAVAILABLE);
+                    e);
         } catch (ResourceAccessException e) {
             LOGGER.error(
                     "Cannot connect to Chroma while deleting collection {}: {}",
                     name,
                     e.getMessage());
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
                     "Cannot connect to Chroma: " + e.getMessage(),
-                    e,
-                    HttpStatus.SERVICE_UNAVAILABLE);
+                    e);
         }
     }
 
@@ -198,24 +200,24 @@ public class ChromaClientImpl implements ChromaClient {
                 return false;
             }
             LOGGER.error("Error checking collection existence {}: {}", name, e.getMessage());
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.valueOf(e.getStatusCode().value()),
                     "Failed to check collection existence: " + e.getMessage(),
-                    e,
-                    HttpStatus.valueOf(e.getStatusCode().value()));
+                    e);
         } catch (HttpServerErrorException e) {
             LOGGER.error(
                     "Chroma server error while checking collection {}: {}", name, e.getMessage());
-            throw new LocalLabException(
-                    "Chroma service error: " + e.getMessage(), e, HttpStatus.SERVICE_UNAVAILABLE);
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE, "Chroma service error: " + e.getMessage(), e);
         } catch (ResourceAccessException e) {
             LOGGER.error(
                     "Cannot connect to Chroma while checking collection {}: {}",
                     name,
                     e.getMessage());
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
                     "Cannot connect to Chroma: " + e.getMessage(),
-                    e,
-                    HttpStatus.SERVICE_UNAVAILABLE);
+                    e);
         }
     }
 
@@ -240,19 +242,19 @@ public class ChromaClientImpl implements ChromaClient {
                     "Chroma server error while adding documents to {}: {}",
                     collection,
                     e.getMessage());
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
                     "Chroma service error while adding documents: " + e.getMessage(),
-                    e,
-                    HttpStatus.SERVICE_UNAVAILABLE);
+                    e);
         } catch (ResourceAccessException e) {
             LOGGER.error(
                     "Cannot connect to Chroma while adding documents to {}: {}",
                     collection,
                     e.getMessage());
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
                     "Cannot connect to Chroma: " + e.getMessage(),
-                    e,
-                    HttpStatus.SERVICE_UNAVAILABLE);
+                    e);
         }
     }
 
@@ -281,17 +283,17 @@ public class ChromaClientImpl implements ChromaClient {
             return new ArrayList<>(); // Never reached, handleQueryError always throws
         } catch (HttpServerErrorException e) {
             LOGGER.error("Chroma server error while querying {}: {}", collection, e.getMessage());
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
                     "Chroma service error while querying: " + e.getMessage(),
-                    e,
-                    HttpStatus.SERVICE_UNAVAILABLE);
+                    e);
         } catch (ResourceAccessException e) {
             LOGGER.error(
                     "Cannot connect to Chroma while querying {}: {}", collection, e.getMessage());
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
                     "Cannot connect to Chroma: " + e.getMessage(),
-                    e,
-                    HttpStatus.SERVICE_UNAVAILABLE);
+                    e);
         }
     }
 
@@ -303,7 +305,8 @@ public class ChromaClientImpl implements ChromaClient {
      *
      * @param name the collection name
      * @return the collection UUID
-     * @throws LocalLabException if the collection is not found or service is unavailable
+     * @throws EntityNotFoundException if the collection is not found
+     * @throws ResponseStatusException if the service is unavailable
      */
     @SuppressWarnings("unchecked")
     private String getCollectionId(String name) {
@@ -315,27 +318,26 @@ public class ChromaClientImpl implements ChromaClient {
             if (body != null && body.containsKey("id")) {
                 return body.get("id").toString();
             }
-            throw new LocalLabException(
-                    "Collection response missing ID field for: " + name,
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Collection response missing ID field for: " + name);
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 LOGGER.warn("Collection not found: {}", name);
-                throw new LocalLabException(
-                        "Collection not found: " + name, e, HttpStatus.NOT_FOUND);
+                throw new EntityNotFoundException("Collection not found: " + name);
             }
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.valueOf(e.getStatusCode().value()),
                     "Failed to get collection: " + e.getMessage(),
-                    e,
-                    HttpStatus.valueOf(e.getStatusCode().value()));
+                    e);
         } catch (HttpServerErrorException e) {
-            throw new LocalLabException(
-                    "Chroma service error: " + e.getMessage(), e, HttpStatus.SERVICE_UNAVAILABLE);
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE, "Chroma service error: " + e.getMessage(), e);
         } catch (ResourceAccessException e) {
-            throw new LocalLabException(
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
                     "Cannot connect to Chroma: " + e.getMessage(),
-                    e,
-                    HttpStatus.SERVICE_UNAVAILABLE);
+                    e);
         }
     }
 
@@ -453,7 +455,8 @@ public class ChromaClientImpl implements ChromaClient {
      *
      * @param e the HTTP client error exception
      * @param name the collection name
-     * @throws LocalLabException with appropriate HTTP status
+     * @throws IllegalStateException if collection already exists
+     * @throws ResponseStatusException for other client errors
      */
     private void handleCreateCollectionError(HttpClientErrorException e, String name) {
         boolean isConflict = e.getStatusCode() == HttpStatus.CONFLICT;
@@ -463,14 +466,13 @@ public class ChromaClientImpl implements ChromaClient {
 
         if (isConflict || isBadRequestWithAlreadyExists) {
             LOGGER.warn("Collection already exists: {}", name);
-            throw new LocalLabException(
-                    "Collection already exists: " + name, e, HttpStatus.CONFLICT);
+            throw new IllegalStateException("Collection already exists: " + name);
         }
         LOGGER.error("Error creating collection {}: {}", name, e.getMessage());
-        throw new LocalLabException(
+        throw new ResponseStatusException(
+                HttpStatus.valueOf(e.getStatusCode().value()),
                 "Failed to create collection: " + e.getMessage(),
-                e,
-                HttpStatus.valueOf(e.getStatusCode().value()));
+                e);
     }
 
     /**
@@ -478,19 +480,19 @@ public class ChromaClientImpl implements ChromaClient {
      *
      * @param e the HTTP client error exception
      * @param collection the collection name
-     * @throws LocalLabException with appropriate HTTP status
+     * @throws EntityNotFoundException if collection not found
+     * @throws ResponseStatusException for other client errors
      */
     private void handleAddDocumentsError(HttpClientErrorException e, String collection) {
         if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
             LOGGER.warn("Collection not found while adding documents: {}", collection);
-            throw new LocalLabException(
-                    "Collection not found: " + collection, e, HttpStatus.NOT_FOUND);
+            throw new EntityNotFoundException("Collection not found: " + collection);
         }
         LOGGER.error("Error adding documents to collection {}: {}", collection, e.getMessage());
-        throw new LocalLabException(
+        throw new ResponseStatusException(
+                HttpStatus.valueOf(e.getStatusCode().value()),
                 "Failed to add documents: " + e.getMessage(),
-                e,
-                HttpStatus.valueOf(e.getStatusCode().value()));
+                e);
     }
 
     /**
@@ -498,18 +500,18 @@ public class ChromaClientImpl implements ChromaClient {
      *
      * @param e the HTTP client error exception
      * @param collection the collection name
-     * @throws LocalLabException with appropriate HTTP status
+     * @throws EntityNotFoundException if collection not found
+     * @throws ResponseStatusException for other client errors
      */
     private void handleQueryError(HttpClientErrorException e, String collection) {
         if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
             LOGGER.warn("Collection not found while querying: {}", collection);
-            throw new LocalLabException(
-                    "Collection not found: " + collection, e, HttpStatus.NOT_FOUND);
+            throw new EntityNotFoundException("Collection not found: " + collection);
         }
         LOGGER.error("Error querying collection {}: {}", collection, e.getMessage());
-        throw new LocalLabException(
+        throw new ResponseStatusException(
+                HttpStatus.valueOf(e.getStatusCode().value()),
                 "Failed to query collection: " + e.getMessage(),
-                e,
-                HttpStatus.valueOf(e.getStatusCode().value()));
+                e);
     }
 }

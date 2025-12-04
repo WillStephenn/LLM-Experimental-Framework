@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.locallab.dto.ChromaDocument;
 import com.locallab.dto.ChromaQueryResult;
-import com.locallab.exception.LocalLabException;
 
 /**
  * Client interface for interacting with a Chroma vector store instance.
@@ -61,10 +60,9 @@ public interface ChromaClient {
      *     doc-{documentId}-{embeddingModel}}
      * @param dimensions the vector dimensionality, which must match the embedding model output
      *     (e.g., 768 for nomic-embed-text)
-     * @throws LocalLabException with {@code HttpStatus.CONFLICT} if a collection with the same name
-     *     already exists
-     * @throws LocalLabException with {@code HttpStatus.SERVICE_UNAVAILABLE} if the Chroma service
-     *     is unreachable or fails to respond
+     * @throws IllegalStateException if a collection with the same name already exists
+     * @throws org.springframework.web.server.ResponseStatusException with {@code
+     *     HttpStatus.SERVICE_UNAVAILABLE} if the Chroma service is unreachable
      */
     void createCollection(String name, int dimensions);
 
@@ -76,8 +74,8 @@ public interface ChromaClient {
      * not throw an exception.
      *
      * @param name the collection identifier to delete
-     * @throws LocalLabException with {@code HttpStatus.SERVICE_UNAVAILABLE} if the Chroma service
-     *     is unreachable or fails to respond
+     * @throws org.springframework.web.server.ResponseStatusException with {@code
+     *     HttpStatus.SERVICE_UNAVAILABLE} if the Chroma service is unreachable
      */
     void deleteCollection(String name);
 
@@ -90,8 +88,8 @@ public interface ChromaClient {
      *
      * @param name the collection identifier to check
      * @return {@code true} if the collection exists; {@code false} otherwise
-     * @throws LocalLabException with {@code HttpStatus.SERVICE_UNAVAILABLE} if the Chroma service
-     *     is unreachable or fails to respond
+     * @throws org.springframework.web.server.ResponseStatusException with {@code
+     *     HttpStatus.SERVICE_UNAVAILABLE} if the Chroma service is unreachable
      */
     boolean collectionExists(String name);
 
@@ -108,9 +106,9 @@ public interface ChromaClient {
      * @param collection the target collection name
      * @param documents the list of documents to insert, each containing id, content, embedding, and
      *     optional metadata
-     * @throws LocalLabException with {@code HttpStatus.NOT_FOUND} if the collection does not exist
-     * @throws LocalLabException with {@code HttpStatus.SERVICE_UNAVAILABLE} if the Chroma service
-     *     is unreachable or fails to respond
+     * @throws jakarta.persistence.EntityNotFoundException if the collection does not exist
+     * @throws org.springframework.web.server.ResponseStatusException with {@code
+     *     HttpStatus.SERVICE_UNAVAILABLE} if the Chroma service is unreachable
      */
     void addDocuments(String collection, List<ChromaDocument> documents);
 
@@ -129,9 +127,9 @@ public interface ChromaClient {
      * @param topK the maximum number of results to return
      * @return a list of query results ordered by ascending distance (most similar first); returns
      *     an empty list if no matches are found
-     * @throws LocalLabException with {@code HttpStatus.NOT_FOUND} if the collection does not exist
-     * @throws LocalLabException with {@code HttpStatus.SERVICE_UNAVAILABLE} if the Chroma service
-     *     is unreachable or fails to respond
+     * @throws jakarta.persistence.EntityNotFoundException if the collection does not exist
+     * @throws org.springframework.web.server.ResponseStatusException with {@code
+     *     HttpStatus.SERVICE_UNAVAILABLE} if the Chroma service is unreachable
      */
     List<ChromaQueryResult> query(String collection, double[] embedding, int topK);
 }

@@ -8,10 +8,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.locallab.dto.response.ErrorResponse;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -24,7 +26,10 @@ import jakarta.servlet.http.HttpServletRequest;
  * <p>Handled exceptions:
  *
  * <ul>
- *   <li>{@link LocalLabException} - Application-specific exceptions
+ *   <li>{@link ResponseStatusException} - Spring's standard status exception
+ *   <li>{@link EntityNotFoundException} - JPA entity not found errors (404)
+ *   <li>{@link IllegalArgumentException} - Invalid argument errors (400)
+ *   <li>{@link IllegalStateException} - Invalid state errors (409)
  *   <li>{@link MethodArgumentNotValidException} - Bean validation errors
  *   <li>{@link MethodArgumentTypeMismatchException} - Type conversion errors
  *   <li>{@link NoHandlerFoundException} - 404 errors for unknown endpoints
@@ -33,7 +38,6 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  * @author William Stephen
  * @see ErrorResponse
- * @see LocalLabException
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -41,26 +45,114 @@ public class GlobalExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
-     * Handles LocalLab application-specific exceptions.
+     * Handles Spring's ResponseStatusException.
      *
-     * @param ex the LocalLabException thrown
+     * <p>This handler supports the standard Spring exception pattern where the HTTP status is
+     * embedded in the exception itself.
+     *
+     * @param ex the ResponseStatusException thrown
      * @param request the HTTP request that triggered the exception
      * @return ResponseEntity containing the error response with appropriate status code
      */
-    @ExceptionHandler(LocalLabException.class)
-    public ResponseEntity<ErrorResponse> handleLocalLabException(
-            LocalLabException ex, HttpServletRequest request) {
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatusException(
+            ResponseStatusException ex, HttpServletRequest request) {
 
-        LOGGER.warn("LocalLabException: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
+        LOGGER.warn(
+                "ResponseStatusException: {} - Status: {} - Path: {}",
+                ex.getReason(),
+                status,
+                request.getRequestURI());
 
         ErrorResponse errorResponse =
                 new ErrorResponse(
-                        ex.getStatus().value(),
-                        ex.getStatus().getReasonPhrase(),
+                        status.value(),
+                        status.getReasonPhrase(),
+                        ex.getReason() != null ? ex.getReason() : status.getReasonPhrase(),
+                        request.getRequestURI());
+
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+    /**
+     * Handles JPA EntityNotFoundException.
+     *
+     * <p>Returns HTTP 404 Not Found when a requested entity does not exist.
+     *
+     * @param ex the EntityNotFoundException thrown
+     * @param request the HTTP request that triggered the exception
+     * @return ResponseEntity containing the error response with 404 status
+     */
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(
+            EntityNotFoundException ex, HttpServletRequest request) {
+
+        LOGGER.warn(
+                "EntityNotFoundException: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+
+        ErrorResponse errorResponse =
+                new ErrorResponse(
+                        HttpStatus.NOT_FOUND.value(),
+                        HttpStatus.NOT_FOUND.getReasonPhrase(),
                         ex.getMessage(),
                         request.getRequestURI());
 
-        return new ResponseEntity<>(errorResponse, ex.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Handles IllegalArgumentException.
+     *
+     * <p>Returns HTTP 400 Bad Request when invalid arguments are provided.
+     *
+     * @param ex the IllegalArgumentException thrown
+     * @param request the HTTP request that triggered the exception
+     * @return ResponseEntity containing the error response with 400 status
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+            IllegalArgumentException ex, HttpServletRequest request) {
+
+        LOGGER.warn(
+                "IllegalArgumentException: {} - Path: {}",
+                ex.getMessage(),
+                request.getRequestURI());
+
+        ErrorResponse errorResponse =
+                new ErrorResponse(
+                        HttpStatus.BAD_REQUEST.value(),
+                        HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                        ex.getMessage(),
+                        request.getRequestURI());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles IllegalStateException.
+     *
+     * <p>Returns HTTP 409 Conflict when an operation cannot be performed due to the current state.
+     *
+     * @param ex the IllegalStateException thrown
+     * @param request the HTTP request that triggered the exception
+     * @return ResponseEntity containing the error response with 409 status
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(
+            IllegalStateException ex, HttpServletRequest request) {
+
+        LOGGER.warn(
+                "IllegalStateException: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+
+        ErrorResponse errorResponse =
+                new ErrorResponse(
+                        HttpStatus.CONFLICT.value(),
+                        HttpStatus.CONFLICT.getReasonPhrase(),
+                        ex.getMessage(),
+                        request.getRequestURI());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     /**

@@ -6,7 +6,6 @@ import com.locallab.dto.request.EmbeddingRequest;
 import com.locallab.dto.request.GenerationRequest;
 import com.locallab.dto.response.EmbeddingResponse;
 import com.locallab.dto.response.GenerationResponse;
-import com.locallab.exception.LocalLabException;
 
 /**
  * Client interface for interacting with an Ollama instance.
@@ -50,8 +49,8 @@ public interface OllamaClient {
      * requests.
      *
      * @return a list of available model names; returns an empty list if no models are installed
-     * @throws LocalLabException with {@code HttpStatus.SERVICE_UNAVAILABLE} if the Ollama service
-     *     is unreachable or fails to respond
+     * @throws org.springframework.web.server.ResponseStatusException with {@code
+     *     HttpStatus.SERVICE_UNAVAILABLE} if the Ollama service is unreachable
      */
     List<String> listModels();
 
@@ -88,12 +87,9 @@ public interface OllamaClient {
      * @param request the generation request containing the model, prompt, and parameters; must not
      *     be {@code null}
      * @return a {@link GenerationResponse} containing the generated text and metrics
-     * @throws LocalLabException with {@code HttpStatus.BAD_REQUEST} if the request is invalid
-     *     (e.g., missing required fields, invalid model name)
-     * @throws LocalLabException with {@code HttpStatus.SERVICE_UNAVAILABLE} if the Ollama service
-     *     is unreachable or fails during generation
-     * @throws LocalLabException with {@code HttpStatus.INTERNAL_SERVER_ERROR} for unexpected errors
-     *     during generation
+     * @throws IllegalArgumentException if the request is invalid (e.g., missing required fields)
+     * @throws org.springframework.web.server.ResponseStatusException with {@code
+     *     HttpStatus.SERVICE_UNAVAILABLE} if the Ollama service is unreachable
      */
     GenerationResponse generate(GenerationRequest request);
 
@@ -110,12 +106,9 @@ public interface OllamaClient {
      * @param request the embedding request containing the model name and input text; must not be
      *     {@code null}
      * @return an {@link EmbeddingResponse} containing the embedding vector and model name
-     * @throws LocalLabException with {@code HttpStatus.BAD_REQUEST} if the request is invalid
-     *     (e.g., missing required fields, invalid model name)
-     * @throws LocalLabException with {@code HttpStatus.SERVICE_UNAVAILABLE} if the Ollama service
-     *     is unreachable or fails during embedding generation
-     * @throws LocalLabException with {@code HttpStatus.INTERNAL_SERVER_ERROR} for unexpected errors
-     *     during embedding generation
+     * @throws IllegalArgumentException if the request is invalid (e.g., missing required fields)
+     * @throws org.springframework.web.server.ResponseStatusException with {@code
+     *     HttpStatus.SERVICE_UNAVAILABLE} if the Ollama service is unreachable
      */
     EmbeddingResponse embed(EmbeddingRequest request);
 }

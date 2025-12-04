@@ -17,13 +17,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.locallab.config.OllamaConfig;
 import com.locallab.dto.request.EmbeddingRequest;
 import com.locallab.dto.request.GenerationRequest;
 import com.locallab.dto.response.EmbeddingResponse;
 import com.locallab.dto.response.GenerationResponse;
-import com.locallab.exception.LocalLabException;
 
 import io.github.ollama4j.OllamaAPI;
 import io.github.ollama4j.exceptions.OllamaBaseException;
@@ -107,17 +107,17 @@ class OllamaClientImplTest {
         }
 
         @Test
-        @DisplayName("should throw LocalLabException when Ollama is unavailable")
+        @DisplayName("should throw ResponseStatusException when Ollama is unavailable")
         void shouldThrowExceptionWhenUnavailable() throws Exception {
             // Arrange
             when(ollamaApi.listModels()).thenThrow(new OllamaBaseException("Connection refused"));
 
             // Act & Assert
-            LocalLabException exception =
-                    assertThrows(LocalLabException.class, () -> ollamaClient.listModels());
+            ResponseStatusException exception =
+                    assertThrows(ResponseStatusException.class, () -> ollamaClient.listModels());
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
-            assertTrue(exception.getMessage().contains("listModels"));
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
+            assertTrue(exception.getReason().contains("listModels"));
         }
 
         @Test
@@ -252,10 +252,11 @@ class OllamaClientImplTest {
                     .thenThrow(new OllamaBaseException("model 'nonexistent-model' not found"));
 
             // Act & Assert
-            LocalLabException exception =
-                    assertThrows(LocalLabException.class, () -> ollamaClient.generate(request));
+            ResponseStatusException exception =
+                    assertThrows(
+                            ResponseStatusException.class, () -> ollamaClient.generate(request));
 
-            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         }
 
         @Test
@@ -270,10 +271,11 @@ class OllamaClientImplTest {
                     .thenThrow(new IOException("Connection refused"));
 
             // Act & Assert
-            LocalLabException exception =
-                    assertThrows(LocalLabException.class, () -> ollamaClient.generate(request));
+            ResponseStatusException exception =
+                    assertThrows(
+                            ResponseStatusException.class, () -> ollamaClient.generate(request));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -385,7 +387,7 @@ class OllamaClientImplTest {
         }
 
         @Test
-        @DisplayName("should throw LocalLabException when embedding fails")
+        @DisplayName("should throw ResponseStatusException when embedding fails")
         void shouldThrowExceptionWhenEmbeddingFails() throws Exception {
             // Arrange
             EmbeddingRequest request =
@@ -395,10 +397,10 @@ class OllamaClientImplTest {
                     .thenThrow(new OllamaBaseException("model 'invalid-model' not found"));
 
             // Act & Assert
-            LocalLabException exception =
-                    assertThrows(LocalLabException.class, () -> ollamaClient.embed(request));
+            ResponseStatusException exception =
+                    assertThrows(ResponseStatusException.class, () -> ollamaClient.embed(request));
 
-            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         }
     }
 
@@ -416,7 +418,7 @@ class OllamaClientImplTest {
                     .thenThrow(new OllamaBaseException("Connection timeout"));
 
             // Act & Assert
-            assertThrows(LocalLabException.class, () -> ollamaClient.listModels());
+            assertThrows(ResponseStatusException.class, () -> ollamaClient.listModels());
             verify(ollamaApi, times(3)).listModels();
         }
 
@@ -428,7 +430,7 @@ class OllamaClientImplTest {
                     .thenThrow(new OllamaBaseException("model 'test' not found"));
 
             // Act & Assert
-            assertThrows(LocalLabException.class, () -> ollamaClient.listModels());
+            assertThrows(ResponseStatusException.class, () -> ollamaClient.listModels());
             verify(ollamaApi, times(1)).listModels();
         }
 
@@ -458,7 +460,7 @@ class OllamaClientImplTest {
                     .thenThrow(new OllamaBaseException("pull model xyz not found"));
 
             // Act & Assert
-            assertThrows(LocalLabException.class, () -> ollamaClient.listModels());
+            assertThrows(ResponseStatusException.class, () -> ollamaClient.listModels());
             verify(ollamaApi, times(1)).listModels(); // Should not retry
         }
     }
@@ -495,10 +497,10 @@ class OllamaClientImplTest {
                     .thenThrow(new OllamaBaseException("invalid request format"));
 
             // Act & Assert
-            LocalLabException exception =
-                    assertThrows(LocalLabException.class, () -> ollamaClient.listModels());
+            ResponseStatusException exception =
+                    assertThrows(ResponseStatusException.class, () -> ollamaClient.listModels());
 
-            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         }
 
         @Test
@@ -509,10 +511,10 @@ class OllamaClientImplTest {
                     .thenThrow(new OllamaBaseException("timeout waiting for response"));
 
             // Act & Assert
-            LocalLabException exception =
-                    assertThrows(LocalLabException.class, () -> ollamaClient.listModels());
+            ResponseStatusException exception =
+                    assertThrows(ResponseStatusException.class, () -> ollamaClient.listModels());
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -522,10 +524,10 @@ class OllamaClientImplTest {
             when(ollamaApi.listModels()).thenThrow(new OllamaBaseException("connection refused"));
 
             // Act & Assert
-            LocalLabException exception =
-                    assertThrows(LocalLabException.class, () -> ollamaClient.listModels());
+            ResponseStatusException exception =
+                    assertThrows(ResponseStatusException.class, () -> ollamaClient.listModels());
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -537,12 +539,12 @@ class OllamaClientImplTest {
             when(ollamaApi.listModels()).thenThrow(nullMessageException);
 
             // Act & Assert
-            LocalLabException exception =
-                    assertThrows(LocalLabException.class, () -> ollamaClient.listModels());
+            ResponseStatusException exception =
+                    assertThrows(ResponseStatusException.class, () -> ollamaClient.listModels());
 
             // Exception with null message should default to ServiceUnavailable
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
-            assertNotNull(exception.getMessage());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
+            assertNotNull(exception.getReason());
         }
 
         @Test
@@ -552,10 +554,10 @@ class OllamaClientImplTest {
             when(ollamaApi.listModels()).thenThrow(new RuntimeException("Unexpected error"));
 
             // Act & Assert
-            LocalLabException exception =
-                    assertThrows(LocalLabException.class, () -> ollamaClient.listModels());
+            ResponseStatusException exception =
+                    assertThrows(ResponseStatusException.class, () -> ollamaClient.listModels());
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -569,11 +571,11 @@ class OllamaClientImplTest {
                                     "The model 'llama-invalid' was not found on the server"));
 
             // Act & Assert
-            LocalLabException exception =
-                    assertThrows(LocalLabException.class, () -> ollamaClient.listModels());
+            ResponseStatusException exception =
+                    assertThrows(ResponseStatusException.class, () -> ollamaClient.listModels());
 
-            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-            assertTrue(exception.getMessage().toLowerCase().contains("model"));
+            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+            assertTrue(exception.getReason().toLowerCase().contains("model"));
         }
     }
 
