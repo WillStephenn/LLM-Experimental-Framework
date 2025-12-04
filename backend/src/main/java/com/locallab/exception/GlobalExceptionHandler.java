@@ -30,8 +30,6 @@ import jakarta.servlet.http.HttpServletRequest;
  *   <li>{@link EntityNotFoundException} - JPA entity not found errors (404)
  *   <li>{@link IllegalArgumentException} - Invalid argument errors (400)
  *   <li>{@link IllegalStateException} - Invalid state errors (409)
- *   <li>{@link LocalLabException} - Application-specific exceptions (kept for service layer
- *       compatibility)
  *   <li>{@link MethodArgumentNotValidException} - Bean validation errors
  *   <li>{@link MethodArgumentTypeMismatchException} - Type conversion errors
  *   <li>{@link NoHandlerFoundException} - 404 errors for unknown endpoints
@@ -40,7 +38,6 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  * @author William Stephen
  * @see ErrorResponse
- * @see LocalLabException
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -156,33 +153,6 @@ public class GlobalExceptionHandler {
                         request.getRequestURI());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-    }
-
-    /**
-     * Handles LocalLab application-specific exceptions.
-     *
-     * <p><b>Note:</b> This handler is kept temporarily for service layer compatibility during the
-     * migration to standard exceptions. It will be removed once all service layer code has been
-     * migrated.
-     *
-     * @param ex the LocalLabException thrown
-     * @param request the HTTP request that triggered the exception
-     * @return ResponseEntity containing the error response with appropriate status code
-     */
-    @ExceptionHandler(LocalLabException.class)
-    public ResponseEntity<ErrorResponse> handleLocalLabException(
-            LocalLabException ex, HttpServletRequest request) {
-
-        LOGGER.warn("LocalLabException: {} - Path: {}", ex.getMessage(), request.getRequestURI());
-
-        ErrorResponse errorResponse =
-                new ErrorResponse(
-                        ex.getStatus().value(),
-                        ex.getStatus().getReasonPhrase(),
-                        ex.getMessage(),
-                        request.getRequestURI());
-
-        return new ResponseEntity<>(errorResponse, ex.getStatus());
     }
 
     /**
