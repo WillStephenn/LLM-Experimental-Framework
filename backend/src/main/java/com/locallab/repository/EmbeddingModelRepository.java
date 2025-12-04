@@ -10,8 +10,9 @@ import com.locallab.model.EmbeddingModel;
 /**
  * Repository interface for {@link EmbeddingModel} entities.
  *
- * <p>Provides standard CRUD operations via {@link JpaRepository} along with a custom query method
- * for name-based lookup. Spring Data JPA auto-implements the derived query method.
+ * <p>Provides standard CRUD operations via {@link JpaRepository} along with custom query methods
+ * for name-based and Ollama model name lookups. Spring Data JPA auto-implements the derived query
+ * methods.
  *
  * <p>Embedding models store the configuration required to use Ollama embedding models for
  * generating vector representations of text in RAG operations. Each model has a unique name
@@ -35,4 +36,18 @@ public interface EmbeddingModelRepository extends JpaRepository<EmbeddingModel, 
      * @return an {@link Optional} containing the matching embedding model, or empty if not found
      */
     Optional<EmbeddingModel> findByName(String name);
+
+    /**
+     * Finds an embedding model by its Ollama model name.
+     *
+     * <p>This method searches by the Ollama model identifier used for API calls. This is useful
+     * when processing RAG operations where the embedding model is specified by its Ollama name.
+     *
+     * <p>For example, Ollama model names might be "nomic-embed-text", "mxbai-embed-large", or
+     * "all-minilm".
+     *
+     * @param ollamaModelName the Ollama model name to search for (exact match, case-sensitive)
+     * @return an {@link Optional} containing the matching embedding model, or empty if not found
+     */
+    Optional<EmbeddingModel> findByOllamaModelName(String ollamaModelName);
 }

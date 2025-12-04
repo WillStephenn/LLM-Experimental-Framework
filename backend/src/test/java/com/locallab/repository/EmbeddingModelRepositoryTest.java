@@ -134,6 +134,102 @@ class EmbeddingModelRepositoryTest {
     }
 
     @Nested
+    @DisplayName("findByOllamaModelName Query")
+    class FindByOllamaModelNameQuery {
+
+        @Test
+        @DisplayName("Should find embedding model by exact Ollama model name")
+        void shouldFindEmbeddingModelByExactOllamaModelName() {
+            EmbeddingModel model =
+                    EmbeddingModel.builder()
+                            .name("Nomic Embed Text")
+                            .ollamaModelName("nomic-embed-text")
+                            .dimensions(768)
+                            .build();
+            entityManager.persistAndFlush(model);
+
+            Optional<EmbeddingModel> found =
+                    embeddingModelRepository.findByOllamaModelName("nomic-embed-text");
+
+            assertTrue(found.isPresent());
+            assertEquals("Nomic Embed Text", found.get().getName());
+            assertEquals("nomic-embed-text", found.get().getOllamaModelName());
+            assertEquals(768, found.get().getDimensions());
+        }
+
+        @Test
+        @DisplayName("Should return empty Optional when Ollama model name not found")
+        void shouldReturnEmptyOptionalWhenOllamaModelNameNotFound() {
+            EmbeddingModel model =
+                    EmbeddingModel.builder()
+                            .name("Existing Model")
+                            .ollamaModelName("existing-model")
+                            .dimensions(384)
+                            .build();
+            entityManager.persistAndFlush(model);
+
+            Optional<EmbeddingModel> found =
+                    embeddingModelRepository.findByOllamaModelName("nonexistent-model");
+
+            assertFalse(found.isPresent());
+        }
+
+        @Test
+        @DisplayName("Should perform case-sensitive Ollama model name search")
+        void shouldPerformCaseSensitiveOllamaModelNameSearch() {
+            EmbeddingModel model =
+                    EmbeddingModel.builder()
+                            .name("MXBai Embed Large")
+                            .ollamaModelName("mxbai-embed-large")
+                            .dimensions(1024)
+                            .build();
+            entityManager.persistAndFlush(model);
+
+            Optional<EmbeddingModel> foundExact =
+                    embeddingModelRepository.findByOllamaModelName("mxbai-embed-large");
+            Optional<EmbeddingModel> foundUppercase =
+                    embeddingModelRepository.findByOllamaModelName("MXBAI-EMBED-LARGE");
+
+            assertTrue(foundExact.isPresent());
+            assertFalse(foundUppercase.isPresent());
+        }
+
+        @Test
+        @DisplayName("Should return empty Optional when searching with null Ollama model name")
+        void shouldReturnEmptyOptionalWhenSearchingWithNullOllamaModelName() {
+            EmbeddingModel model =
+                    EmbeddingModel.builder()
+                            .name("Test Model")
+                            .ollamaModelName("test-model")
+                            .dimensions(512)
+                            .build();
+            entityManager.persistAndFlush(model);
+
+            Optional<EmbeddingModel> found = embeddingModelRepository.findByOllamaModelName(null);
+
+            assertFalse(found.isPresent());
+        }
+
+        @Test
+        @DisplayName("Should find embedding model with version tag in name")
+        void shouldFindEmbeddingModelWithVersionTagInName() {
+            EmbeddingModel model =
+                    EmbeddingModel.builder()
+                            .name("Model with Version")
+                            .ollamaModelName("model:v1.0")
+                            .dimensions(768)
+                            .build();
+            entityManager.persistAndFlush(model);
+
+            Optional<EmbeddingModel> found =
+                    embeddingModelRepository.findByOllamaModelName("model:v1.0");
+
+            assertTrue(found.isPresent());
+            assertEquals("model:v1.0", found.get().getOllamaModelName());
+        }
+    }
+
+    @Nested
     @DisplayName("Unique Name Constraint")
     class UniqueNameConstraint {
 
