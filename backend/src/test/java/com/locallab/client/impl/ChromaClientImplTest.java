@@ -24,11 +24,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.locallab.config.ChromaConfig;
 import com.locallab.dto.ChromaDocument;
 import com.locallab.dto.ChromaQueryResult;
-import com.locallab.exception.LocalLabException;
+
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Unit tests for {@link ChromaClientImpl}.
@@ -92,12 +94,11 @@ class ChromaClientImplTest {
                     .thenThrow(new HttpClientErrorException(HttpStatus.CONFLICT));
 
             // Act & Assert
-            LocalLabException exception =
+            IllegalStateException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            IllegalStateException.class,
                             () -> chromaClient.createCollection(collectionName, 768));
 
-            assertEquals(HttpStatus.CONFLICT, exception.getStatus());
             assertTrue(exception.getMessage().contains("already exists"));
         }
 
@@ -118,12 +119,12 @@ class ChromaClientImplTest {
                     .thenThrow(exception);
 
             // Act & Assert
-            LocalLabException thrown =
+            IllegalStateException thrown =
                     assertThrows(
-                            LocalLabException.class,
+                            IllegalStateException.class,
                             () -> chromaClient.createCollection(collectionName, 768));
 
-            assertEquals(HttpStatus.CONFLICT, thrown.getStatus());
+            assertTrue(thrown.getMessage().contains("already exists"));
         }
 
         @Test
@@ -136,12 +137,12 @@ class ChromaClientImplTest {
                     .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.createCollection(collectionName, 768));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -154,13 +155,13 @@ class ChromaClientImplTest {
                     .thenThrow(new ResourceAccessException("Connection refused"));
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.createCollection(collectionName, 768));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
-            assertTrue(exception.getMessage().contains("Cannot connect to Chroma"));
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
+            assertTrue(exception.getReason().contains("Cannot connect to Chroma"));
         }
 
         @Test
@@ -175,12 +176,12 @@ class ChromaClientImplTest {
                                     HttpStatus.BAD_REQUEST, "Invalid request"));
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.createCollection(collectionName, 768));
 
-            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         }
     }
 
@@ -223,12 +224,12 @@ class ChromaClientImplTest {
                     .delete(COLLECTIONS_URL + "/" + collectionName);
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.deleteCollection(collectionName));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -241,12 +242,12 @@ class ChromaClientImplTest {
                     .delete(COLLECTIONS_URL + "/" + collectionName);
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.deleteCollection(collectionName));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -259,12 +260,12 @@ class ChromaClientImplTest {
                     .delete(COLLECTIONS_URL + "/" + collectionName);
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.deleteCollection(collectionName));
 
-            assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+            assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
         }
     }
 
@@ -314,12 +315,12 @@ class ChromaClientImplTest {
                     .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.collectionExists(collectionName));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -332,12 +333,12 @@ class ChromaClientImplTest {
                     .thenThrow(new ResourceAccessException("Connection refused"));
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.collectionExists(collectionName));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -350,12 +351,12 @@ class ChromaClientImplTest {
                     .thenThrow(new HttpClientErrorException(HttpStatus.FORBIDDEN));
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.collectionExists(collectionName));
 
-            assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+            assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
         }
     }
 
@@ -401,12 +402,11 @@ class ChromaClientImplTest {
             List<ChromaDocument> documents = createTestDocuments();
 
             // Act & Assert
-            LocalLabException exception =
+            EntityNotFoundException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            EntityNotFoundException.class,
                             () -> chromaClient.addDocuments(COLLECTION_NAME, documents));
 
-            assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
             assertTrue(exception.getMessage().contains("not found"));
         }
 
@@ -430,12 +430,12 @@ class ChromaClientImplTest {
             List<ChromaDocument> documents = createTestDocuments();
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.addDocuments(COLLECTION_NAME, documents));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -458,12 +458,12 @@ class ChromaClientImplTest {
             List<ChromaDocument> documents = createTestDocuments();
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.addDocuments(COLLECTION_NAME, documents));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -486,12 +486,12 @@ class ChromaClientImplTest {
             List<ChromaDocument> documents = createTestDocuments();
 
             // Act & Assert
-            LocalLabException exception =
+            EntityNotFoundException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            EntityNotFoundException.class,
                             () -> chromaClient.addDocuments(COLLECTION_NAME, documents));
 
-            assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+            assertTrue(exception.getMessage().contains("not found"));
         }
 
         @Test
@@ -653,12 +653,12 @@ class ChromaClientImplTest {
             double[] embedding = new double[] {0.1, 0.2, 0.3};
 
             // Act & Assert
-            LocalLabException exception =
+            EntityNotFoundException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            EntityNotFoundException.class,
                             () -> chromaClient.query(COLLECTION_NAME, embedding, 5));
 
-            assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+            assertTrue(exception.getMessage().contains("not found"));
         }
 
         @Test
@@ -682,12 +682,12 @@ class ChromaClientImplTest {
             double[] embedding = new double[] {0.1, 0.2, 0.3};
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.query(COLLECTION_NAME, embedding, 5));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -711,12 +711,12 @@ class ChromaClientImplTest {
             double[] embedding = new double[] {0.1, 0.2, 0.3};
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.query(COLLECTION_NAME, embedding, 5));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -740,12 +740,12 @@ class ChromaClientImplTest {
             double[] embedding = new double[] {0.1, 0.2, 0.3};
 
             // Act & Assert
-            LocalLabException exception =
+            EntityNotFoundException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            EntityNotFoundException.class,
                             () -> chromaClient.query(COLLECTION_NAME, embedding, 5));
 
-            assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+            assertTrue(exception.getMessage().contains("not found"));
         }
 
         @Test
@@ -833,12 +833,12 @@ class ChromaClientImplTest {
             double[] embedding = new double[] {0.1, 0.2, 0.3};
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.query(COLLECTION_NAME, embedding, 5));
 
-            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         }
 
         private Map<String, Object> createQueryResponse() {
@@ -885,13 +885,13 @@ class ChromaClientImplTest {
                                     .build());
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.addDocuments(collectionName, documents));
 
-            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatus());
-            assertTrue(exception.getMessage().contains("missing ID field"));
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+            assertTrue(exception.getReason().contains("missing ID field"));
         }
 
         @Test
@@ -912,12 +912,12 @@ class ChromaClientImplTest {
                                     .build());
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.addDocuments(collectionName, documents));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -938,12 +938,12 @@ class ChromaClientImplTest {
                                     .build());
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.addDocuments(collectionName, documents));
 
-            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         }
 
         @Test
@@ -964,12 +964,12 @@ class ChromaClientImplTest {
                                     .build());
 
             // Act & Assert
-            LocalLabException exception =
+            ResponseStatusException exception =
                     assertThrows(
-                            LocalLabException.class,
+                            ResponseStatusException.class,
                             () -> chromaClient.addDocuments(collectionName, documents));
 
-            assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+            assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
         }
     }
 

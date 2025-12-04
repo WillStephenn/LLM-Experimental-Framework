@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.locallab.client.OllamaClient;
 import com.locallab.config.OllamaConfig;
@@ -18,7 +19,6 @@ import com.locallab.dto.request.EmbeddingRequest;
 import com.locallab.dto.request.GenerationRequest;
 import com.locallab.dto.response.EmbeddingResponse;
 import com.locallab.dto.response.GenerationResponse;
-import com.locallab.exception.LocalLabException;
 
 import io.github.ollama4j.OllamaAPI;
 import io.github.ollama4j.exceptions.OllamaBaseException;
@@ -298,7 +298,7 @@ public class OllamaClientImpl implements OllamaClient {
      * @param operationName the name of the operation for logging
      * @param <T> the return type
      * @return the result of the operation
-     * @throws LocalLabException if all retry attempts fail
+     * @throws ResponseStatusException if all retry attempts fail
      */
     private <T> T executeWithRetry(RetryableOperation<T> operation, String operationName) {
         int maxAttempts = config.getRetry().getMaxAttempts();
@@ -322,18 +322,18 @@ public class OllamaClientImpl implements OllamaClient {
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new LocalLabException(
-                        "Operation interrupted", e, HttpStatus.INTERNAL_SERVER_ERROR);
+                throw new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR, "Operation interrupted", e);
             } catch (Exception e) {
                 LOGGER.error(
                         "Ollama {} failed with unexpected error: {}",
                         operationName,
                         e.getMessage());
-                throw mapToLocalLabException(e, operationName);
+                throw mapToResponseStatusException(e, operationName);
             }
         }
         logFinalFailure(operationName, maxAttempts, lastException);
-        throw mapToLocalLabException(lastException, operationName);
+        throw mapToResponseStatusException(lastException, operationName);
     }
 
     private boolean shouldRetryOllamaException(
@@ -418,22 +418,24 @@ public class OllamaClientImpl implements OllamaClient {
             Thread.sleep(delayMs);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new LocalLabException("Sleep interrupted", e, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Sleep interrupted", e);
         }
     }
 
     /**
-     * Maps an exception to a LocalLabException with an appropriate HTTP status.
+     * Maps an exception to a ResponseStatusException with an appropriate HTTP status.
      *
      * @param e the exception to map
      * @param operationName the name of the operation that failed
-     * @return the mapped LocalLabException
+     * @return the mapped ResponseStatusException
      */
-    private LocalLabException mapToLocalLabException(Exception e, String operationName) {
+    private ResponseStatusException mapToResponseStatusException(
+            Exception e, String operationName) {
         if (e == null) {
-            return new LocalLabException(
-                    "Ollama " + operationName + " failed: Unknown error",
-                    HttpStatus.SERVICE_UNAVAILABLE);
+            return new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Ollama " + operationName + " failed: Unknown error");
         }
 
         String message = e.getMessage();
@@ -457,7 +459,8 @@ public class OllamaClientImpl implements OllamaClient {
             status = HttpStatus.SERVICE_UNAVAILABLE;
         }
 
-        return new LocalLabException("Ollama " + operationName + " failed: " + message, e, status);
+        return new ResponseStatusException(
+                status, "Ollama " + operationName + " failed: " + message, e);
     }
 
     /**

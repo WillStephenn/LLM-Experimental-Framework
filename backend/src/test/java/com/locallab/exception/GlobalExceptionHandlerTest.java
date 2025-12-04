@@ -24,10 +24,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.locallab.dto.response.ErrorResponse;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 /** Unit tests for {@link GlobalExceptionHandler}. */
@@ -132,6 +134,202 @@ class GlobalExceptionHandlerTest {
 
             ResponseEntity<ErrorResponse> response =
                     handler.handleLocalLabException(exception, request);
+
+            assertNotNull(response.getBody());
+            assertNotNull(response.getBody().getTimestamp());
+        }
+    }
+
+    @Nested
+    @DisplayName("handleResponseStatusException")
+    class HandleResponseStatusExceptionTests {
+
+        @Test
+        @DisplayName("Should return correct status and message for SERVICE_UNAVAILABLE")
+        void shouldReturnCorrectStatusAndMessageForServiceUnavailable() {
+            ResponseStatusException exception =
+                    new ResponseStatusException(
+                            HttpStatus.SERVICE_UNAVAILABLE, "Ollama service is unavailable");
+
+            ResponseEntity<ErrorResponse> response =
+                    handler.handleResponseStatusException(exception, request);
+
+            assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
+            assertNotNull(response.getBody());
+            assertEquals(503, response.getBody().getStatus());
+            assertEquals("Service Unavailable", response.getBody().getError());
+            assertEquals("Ollama service is unavailable", response.getBody().getMessage());
+            assertEquals("/api/test", response.getBody().getPath());
+        }
+
+        @Test
+        @DisplayName("Should return correct status and message for BAD_REQUEST")
+        void shouldReturnCorrectStatusAndMessageForBadRequest() {
+            ResponseStatusException exception =
+                    new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid model specified");
+
+            ResponseEntity<ErrorResponse> response =
+                    handler.handleResponseStatusException(exception, request);
+
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            assertNotNull(response.getBody());
+            assertEquals(400, response.getBody().getStatus());
+            assertEquals("Bad Request", response.getBody().getError());
+            assertEquals("Invalid model specified", response.getBody().getMessage());
+        }
+
+        @Test
+        @DisplayName("Should return correct status for INTERNAL_SERVER_ERROR")
+        void shouldReturnCorrectStatusForInternalServerError() {
+            ResponseStatusException exception =
+                    new ResponseStatusException(
+                            HttpStatus.INTERNAL_SERVER_ERROR, "Operation interrupted");
+
+            ResponseEntity<ErrorResponse> response =
+                    handler.handleResponseStatusException(exception, request);
+
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+            assertNotNull(response.getBody());
+            assertEquals(500, response.getBody().getStatus());
+        }
+
+        @Test
+        @DisplayName("Should use status reason phrase when reason is null")
+        void shouldUseStatusReasonPhraseWhenReasonIsNull() {
+            ResponseStatusException exception =
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, null);
+
+            ResponseEntity<ErrorResponse> response =
+                    handler.handleResponseStatusException(exception, request);
+
+            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+            assertNotNull(response.getBody());
+            assertEquals("Not Found", response.getBody().getMessage());
+        }
+
+        @Test
+        @DisplayName("Should include timestamp in response")
+        void shouldIncludeTimestampInResponse() {
+            ResponseStatusException exception =
+                    new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error");
+
+            ResponseEntity<ErrorResponse> response =
+                    handler.handleResponseStatusException(exception, request);
+
+            assertNotNull(response.getBody());
+            assertNotNull(response.getBody().getTimestamp());
+        }
+    }
+
+    @Nested
+    @DisplayName("handleEntityNotFoundException")
+    class HandleEntityNotFoundExceptionTests {
+
+        @Test
+        @DisplayName("Should return NOT_FOUND with entity message")
+        void shouldReturnNotFoundWithEntityMessage() {
+            EntityNotFoundException exception =
+                    new EntityNotFoundException("Collection not found: test-collection");
+
+            ResponseEntity<ErrorResponse> response =
+                    handler.handleEntityNotFoundException(exception, request);
+
+            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+            assertNotNull(response.getBody());
+            assertEquals(404, response.getBody().getStatus());
+            assertEquals("Not Found", response.getBody().getError());
+            assertEquals("Collection not found: test-collection", response.getBody().getMessage());
+            assertEquals("/api/test", response.getBody().getPath());
+        }
+
+        @Test
+        @DisplayName("Should include timestamp in response")
+        void shouldIncludeTimestampInResponse() {
+            EntityNotFoundException exception = new EntityNotFoundException("Entity not found");
+
+            ResponseEntity<ErrorResponse> response =
+                    handler.handleEntityNotFoundException(exception, request);
+
+            assertNotNull(response.getBody());
+            assertNotNull(response.getBody().getTimestamp());
+        }
+
+        @Test
+        @DisplayName("Should handle null message gracefully")
+        void shouldHandleNullMessageGracefully() {
+            EntityNotFoundException exception = new EntityNotFoundException((String) null);
+
+            ResponseEntity<ErrorResponse> response =
+                    handler.handleEntityNotFoundException(exception, request);
+
+            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+            assertNotNull(response.getBody());
+        }
+    }
+
+    @Nested
+    @DisplayName("handleIllegalArgumentException")
+    class HandleIllegalArgumentExceptionTests {
+
+        @Test
+        @DisplayName("Should return BAD_REQUEST with argument message")
+        void shouldReturnBadRequestWithArgumentMessage() {
+            IllegalArgumentException exception =
+                    new IllegalArgumentException("Invalid parameter value");
+
+            ResponseEntity<ErrorResponse> response =
+                    handler.handleIllegalArgumentException(exception, request);
+
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            assertNotNull(response.getBody());
+            assertEquals(400, response.getBody().getStatus());
+            assertEquals("Bad Request", response.getBody().getError());
+            assertEquals("Invalid parameter value", response.getBody().getMessage());
+            assertEquals("/api/test", response.getBody().getPath());
+        }
+
+        @Test
+        @DisplayName("Should include timestamp in response")
+        void shouldIncludeTimestampInResponse() {
+            IllegalArgumentException exception = new IllegalArgumentException("Invalid argument");
+
+            ResponseEntity<ErrorResponse> response =
+                    handler.handleIllegalArgumentException(exception, request);
+
+            assertNotNull(response.getBody());
+            assertNotNull(response.getBody().getTimestamp());
+        }
+    }
+
+    @Nested
+    @DisplayName("handleIllegalStateException")
+    class HandleIllegalStateExceptionTests {
+
+        @Test
+        @DisplayName("Should return CONFLICT with state message")
+        void shouldReturnConflictWithStateMessage() {
+            IllegalStateException exception =
+                    new IllegalStateException("Collection already exists: test-collection");
+
+            ResponseEntity<ErrorResponse> response =
+                    handler.handleIllegalStateException(exception, request);
+
+            assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+            assertNotNull(response.getBody());
+            assertEquals(409, response.getBody().getStatus());
+            assertEquals("Conflict", response.getBody().getError());
+            assertEquals(
+                    "Collection already exists: test-collection", response.getBody().getMessage());
+            assertEquals("/api/test", response.getBody().getPath());
+        }
+
+        @Test
+        @DisplayName("Should include timestamp in response")
+        void shouldIncludeTimestampInResponse() {
+            IllegalStateException exception = new IllegalStateException("Invalid state");
+
+            ResponseEntity<ErrorResponse> response =
+                    handler.handleIllegalStateException(exception, request);
 
             assertNotNull(response.getBody());
             assertNotNull(response.getBody().getTimestamp());
@@ -343,9 +541,9 @@ class GlobalExceptionHandlerTest {
         }
 
         @Test
-        @DisplayName("Should handle IllegalStateException")
-        void shouldHandleIllegalStateException() {
-            Exception exception = new IllegalStateException("Invalid state");
+        @DisplayName("Should handle OutOfMemoryError wrapped in exception")
+        void shouldHandleOutOfMemoryErrorWrappedInException() {
+            Exception exception = new RuntimeException("Memory exhausted");
 
             ResponseEntity<ErrorResponse> response =
                     handler.handleGenericException(exception, request);
