@@ -235,18 +235,28 @@ chroma:
 **Labels**: `child-1`, `backend`  
 **Status**: Depends on: 1.3  
 **Description**:
-- Create `LocalLabException` base exception class
 - Create `GlobalExceptionHandler` with `@ControllerAdvice`
 - Define standard error response DTO
-- Handle common exceptions (validation, not found, etc.)
+- Handle common exceptions using standard Spring/Java exceptions
+
+**Standard Exception Mapping**:
+| Scenario | Exception |
+|----------|----------|
+| Resource not found | `EntityNotFoundException` |
+| State/conflict errors | `IllegalStateException` |
+| Validation/input errors | `IllegalArgumentException` |
+| Other HTTP status codes | `ResponseStatusException(status, ...)` |
 
 **Acceptance Criteria**:
 - [ ] All exceptions return consistent JSON structure
 - [ ] Validation errors return field-level details
 - [ ] 404 errors return meaningful messages
+- [ ] `EntityNotFoundException` handled with 404 response
+- [ ] `IllegalStateException` handled with 409 response
+- [ ] `IllegalArgumentException` handled with 400 response
+- [ ] `ResponseStatusException` handled with appropriate status
 
 **Files**:
-- `exception/LocalLabException.java`
 - `exception/GlobalExceptionHandler.java`
 - `dto/response/ErrorResponse.java`
 
@@ -707,12 +717,20 @@ List<ChromaQueryResult> query(String collection, float[] embedding, int topK);
 - Inject OllamaClient
 - Provide high-level methods for model listing
 - Provide generation with configuration mapping
-- Handle errors and convert to LocalLabException
+- Handle errors using standard exceptions
+
+**Exception Handling**:
+| Scenario | Exception |
+|----------|----------|
+| Connectivity issues | `ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, ...)` |
+| Invalid request parameters | `IllegalArgumentException(...)` |
+| Resource not found | `EntityNotFoundException(...)` |
 
 **Acceptance Criteria**:
 - [ ] `getAvailableModels()` returns list of model names
 - [ ] `checkConnectivity()` returns status DTO
 - [ ] `generate()` accepts config DTO and returns response DTO
+- [ ] All errors wrapped in appropriate standard exceptions
 
 **Methods**:
 ```java
@@ -731,6 +749,12 @@ GenerationResponse generate(GenerationRequest request);
 - Variable extraction from prompt templates
 - Tag management and filtering
 - Search functionality
+
+**Exception Handling**:
+| Scenario | Exception |
+|----------|----------|
+| Template not found | `EntityNotFoundException("Task template not found: " + id)` |
+| Validation failures | `IllegalArgumentException(...)` |
 
 **Acceptance Criteria**:
 - [ ] All CRUD operations work
@@ -759,9 +783,15 @@ List<TaskTemplate> filterByTag(String tag);
 - CRUD operations for SystemPrompt
 - Alias uniqueness validation
 
+**Exception Handling**:
+| Scenario | Exception |
+|----------|----------|
+| System prompt not found | `EntityNotFoundException("System prompt not found: " + id)` |
+| Alias already exists | `IllegalStateException("System prompt with alias '...' already exists")` |
+
 **Acceptance Criteria**:
 - [ ] All CRUD operations work
-- [ ] Duplicate alias throws exception
+- [ ] Duplicate alias throws `IllegalStateException`
 
 ---
 
@@ -773,11 +803,19 @@ List<TaskTemplate> filterByTag(String tag);
 - Store document content in database
 - List and delete documents
 
+**Exception Handling**:
+| Scenario | Exception |
+|----------|----------|
+| Document not found | `EntityNotFoundException("Document not found: " + id)` |
+| Unsupported file type | `IllegalArgumentException("Unsupported file type: ...")` |
+| Extraction failures | `ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ...)` |
+
 **Acceptance Criteria**:
 - [ ] Can upload text files
 - [ ] Can upload PDF files (text extraction)
 - [ ] Documents persist in H2
 - [ ] Delete removes document
+- [ ] Unsupported file types throw `IllegalArgumentException`
 
 ---
 
@@ -791,11 +829,18 @@ List<TaskTemplate> filterByTag(String tag);
 - Query and retrieval logic
 - Context assembly for LLM
 
+**Exception Handling**:
+| Scenario | Exception |
+|----------|----------|
+| Document/embedding model not found | `EntityNotFoundException(...)` |
+| Invalid chunk parameters | `IllegalArgumentException("Chunk overlap must be less than chunk size")` |
+
 **Acceptance Criteria**:
 - [ ] `chunkDocument()` splits text correctly
 - [ ] `embedAndStore()` creates vectors in Chroma
 - [ ] `query()` returns top-K relevant chunks with scores
 - [ ] `buildContext()` assembles retrieved chunks into prompt context
+- [ ] Chunk overlap validation throws `IllegalArgumentException`
 
 **Methods**:
 ```java
@@ -816,10 +861,17 @@ String buildContext(List<RetrievedChunk> chunks);
 - Status management
 - Calculate total run count (models × embeddings × iterations)
 
+**Exception Handling**:
+| Scenario | Exception |
+|----------|----------|
+| Experiment not found | `EntityNotFoundException("Experiment not found: " + id)` |
+| Invalid status transition | `IllegalStateException("Cannot update/delete experiment with status: ...")` |
+| Validation failures | `IllegalArgumentException(...)` |
+
 **Acceptance Criteria**:
 - [ ] All CRUD operations work
 - [ ] Config JSON validates correctly
-- [ ] Status transitions enforced
+- [ ] Status transitions enforced via `IllegalStateException`
 - [ ] Run matrix calculation correct
 
 **Methods**:
@@ -846,6 +898,11 @@ void updateStatus(Long id, ExperimentStatus status);
 - Support pause/resume/cancel
 - Publish progress via WebSocket
 
+**Exception Handling**:
+| Scenario | Exception |
+|----------|----------|
+| Invalid status transition | `IllegalStateException("Experiment must be in DRAFT/PAUSED status...")` |
+
 **Acceptance Criteria**:
 - [ ] Experiment starts and runs all combinations
 - [ ] Each run persists immediately
@@ -853,6 +910,7 @@ void updateStatus(Long id, ExperimentStatus status);
 - [ ] Pause stops after current run
 - [ ] Cancel aborts and marks remaining as cancelled
 - [ ] Progress updates sent via WebSocket
+- [ ] Invalid status throws `IllegalStateException`
 
 **Methods**:
 ```java
@@ -875,10 +933,16 @@ ExperimentProgress getProgress(Long experimentId);
 - Generate leaderboard data
 - Support filtering by experiment, model, embedding
 
+**Exception Handling**:
+| Scenario | Exception |
+|----------|----------|
+| No runs found for model | `EntityNotFoundException("No runs found for model: " + modelName)` |
+
 **Acceptance Criteria**:
 - [ ] Returns correct aggregated metrics
 - [ ] Filtering works correctly
 - [ ] Leaderboard sorted correctly
+- [ ] Empty model results throw `EntityNotFoundException`
 
 **Methods**:
 ```java
