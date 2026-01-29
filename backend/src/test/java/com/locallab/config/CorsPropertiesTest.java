@@ -105,56 +105,13 @@ class CorsPropertiesTest {
 
             assertThat(corsProperties.getMaxAge()).isEqualTo(7200L);
         }
-    }
-
-    @Nested
-    @DisplayName("wildcard origin configuration")
-    class WildcardOriginTests {
 
         @Test
-        @DisplayName("should allow wildcard for development profile")
-        void shouldAllowWildcardForDevelopmentProfile() {
+        @DisplayName("should accept wildcard as allowed origin value")
+        void shouldAcceptWildcardAsAllowedOriginValue() {
             corsProperties.setAllowedOrigins("*");
 
             assertThat(corsProperties.getAllowedOrigins()).isEqualTo("*");
-        }
-
-        @Test
-        @DisplayName("should allow setting credentials to false for wildcard origins")
-        void shouldAllowSettingCredentialsToFalseForWildcardOrigins() {
-            // Note: CORS specification requires credentials to be false when using wildcard
-            // origins. The application-dev.yml correctly configures this combination.
-            // This test verifies the property class supports this configuration.
-            corsProperties.setAllowedOrigins("*");
-            corsProperties.setAllowCredentials(false);
-
-            assertThat(corsProperties.getAllowedOrigins()).isEqualTo("*");
-            assertThat(corsProperties.isAllowCredentials()).isFalse();
-        }
-    }
-
-    @Nested
-    @DisplayName("production configuration")
-    class ProductionConfigurationTests {
-
-        @Test
-        @DisplayName("should support restricted origins for production")
-        void shouldSupportRestrictedOriginsForProduction() {
-            corsProperties.setAllowedOrigins("https://production.example.com");
-            corsProperties.setAllowCredentials(true);
-
-            assertThat(corsProperties.getAllowedOrigins())
-                    .isEqualTo("https://production.example.com");
-            assertThat(corsProperties.isAllowCredentials()).isTrue();
-        }
-
-        @Test
-        @DisplayName("should support multiple production origins")
-        void shouldSupportMultipleProductionOrigins() {
-            corsProperties.setAllowedOrigins("https://app.example.com,https://admin.example.com");
-
-            assertThat(corsProperties.getAllowedOrigins())
-                    .isEqualTo("https://app.example.com,https://admin.example.com");
         }
     }
 }
