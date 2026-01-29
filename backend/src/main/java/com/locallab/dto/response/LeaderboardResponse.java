@@ -34,6 +34,13 @@ public class LeaderboardResponse {
     private List<LeaderboardEntry> entries;
 
     /**
+     * The total number of runs included in this leaderboard analysis.
+     *
+     * <p>This includes both successful and failed runs across all models.
+     */
+    private int totalRuns;
+
+    /**
      * Timestamp when this leaderboard was generated.
      *
      * <p>Uses ISO 8601 format when serialised.
@@ -49,6 +56,7 @@ public class LeaderboardResponse {
     public static LeaderboardResponse fromData(LeaderboardData data) {
         return LeaderboardResponse.builder()
                 .entries(data.getEntries())
+                .totalRuns(data.getTotalRuns())
                 .generatedAt(LocalDateTime.now())
                 .build();
     }

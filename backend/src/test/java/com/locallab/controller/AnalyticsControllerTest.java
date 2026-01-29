@@ -175,6 +175,7 @@ class AnalyticsControllerTest {
                     .andExpect(jsonPath("$.entries[0].successRate", is(96.0)))
                     .andExpect(jsonPath("$.entries[0].avgTokensPerSecond", is(45.5)))
                     .andExpect(jsonPath("$.entries[1].modelName", is("codellama:7b")))
+                    .andExpect(jsonPath("$.totalRuns", is(80)))
                     .andExpect(jsonPath("$.generatedAt").exists());
 
             verify(analyticsService).getLeaderboard(any(LeaderboardFilter.class));
@@ -268,6 +269,7 @@ class AnalyticsControllerTest {
                     .andExpect(jsonPath("$.entries[0].minDurationMs").exists())
                     .andExpect(jsonPath("$.entries[0].maxDurationMs").exists())
                     .andExpect(jsonPath("$.entries[0].avgTimeToFirstTokenMs").exists())
+                    .andExpect(jsonPath("$.totalRuns").exists())
                     .andExpect(jsonPath("$.generatedAt").exists());
         }
     }
