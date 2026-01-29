@@ -109,8 +109,8 @@ public class ResultController {
         ExperimentRun run = resultService.findRunById(id);
         ExperimentRunResponse response = ExperimentRunResponse.fromEntity(run);
 
-        LOGGER.debug(
-                "Returning run: {} for experiment: {}", run.getId(), run.getExperiment().getId());
+        Long experimentId = run.getExperiment() != null ? run.getExperiment().getId() : null;
+        LOGGER.debug("Returning run: {} for experiment: {}", run.getId(), experimentId);
         return ResponseEntity.ok(response);
     }
 
