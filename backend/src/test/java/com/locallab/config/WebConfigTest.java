@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +29,9 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
  * <p>Tests CORS configuration for API endpoints and H2 console access. Verifies that CORS settings
  * are correctly loaded from {@link CorsProperties} and applied to the appropriate URL patterns.
  *
+ * <p>Note: Lenient strictness is used because different tests verify different subsets of the CORS
+ * configuration chain, and not all mocked methods are invoked in every test.
+ *
  * @author William Stephen
  */
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +52,8 @@ class WebConfigTest {
     @Captor private ArgumentCaptor<String[]> methodsCaptor;
 
     @Captor private ArgumentCaptor<String[]> headersCaptor;
+
+    @Captor private ArgumentCaptor<String[]> h2MethodsCaptor;
 
     private WebConfig webConfig;
 
@@ -114,12 +120,29 @@ class WebConfigTest {
         }
 
         @Test
-        @DisplayName("should configure CORS for H2 console")
-        void shouldConfigureCorsForH2Console() {
+        @DisplayName("should configure CORS for H2 console with restricted methods")
+        void shouldConfigureCorsForH2ConsoleWithRestrictedMethods() {
+            when(h2CorsRegistration.allowedMethods(h2MethodsCaptor.capture()))
+                    .thenReturn(h2CorsRegistration);
+
             webConfig.addCorsMappings(corsRegistry);
 
             verify(corsRegistry).addMapping("/h2-console/**");
             verify(h2CorsRegistration).allowCredentials(true);
+
+            // Verify H2 console only allows GET and POST methods (hardcoded in WebConfig)
+            String[] capturedMethods = h2MethodsCaptor.getValue();
+            assertThat(capturedMethods).containsExactly("GET", "POST");
+        }
+
+        @Test
+        @DisplayName("should not configure maxAge for H2 console")
+        void shouldNotConfigureMaxAgeForH2Console() {
+            webConfig.addCorsMappings(corsRegistry);
+
+            // Verify maxAge is only configured for API endpoints, not H2 console
+            verify(apiCorsRegistration).maxAge(3600L);
+            verify(h2CorsRegistration, never()).maxAge(anyLong());
         }
 
         @Test
@@ -194,19 +217,6 @@ class WebConfigTest {
             webConfig.addCorsMappings(corsRegistry);
 
             verify(apiCorsRegistration).maxAge(7200L);
-        }
-    }
-
-    @Nested
-    @DisplayName("constructor")
-    class ConstructorTests {
-
-        @Test
-        @DisplayName("should accept CorsProperties dependency")
-        void shouldAcceptCorsPropertiesDependency() {
-            WebConfig config = new WebConfig(corsProperties);
-
-            assertThat(config).isNotNull();
         }
     }
 }

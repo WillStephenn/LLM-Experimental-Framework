@@ -120,8 +120,11 @@ class CorsPropertiesTest {
         }
 
         @Test
-        @DisplayName("should disable credentials when using wildcard origins")
-        void shouldDisableCredentialsWhenUsingWildcardOrigins() {
+        @DisplayName("should allow setting credentials to false for wildcard origins")
+        void shouldAllowSettingCredentialsToFalseForWildcardOrigins() {
+            // Note: CORS specification requires credentials to be false when using wildcard
+            // origins. The application-dev.yml correctly configures this combination.
+            // This test verifies the property class supports this configuration.
             corsProperties.setAllowedOrigins("*");
             corsProperties.setAllowCredentials(false);
 
