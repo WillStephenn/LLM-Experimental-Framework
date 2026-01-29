@@ -170,6 +170,12 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco-maven-plugin.version}</version>
+				<configuration>
+					<excludes>
+						<!-- Exclude Spring Boot main application class (no business logic) -->
+						<exclude>com/locallab/LocalLabApplication.class</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<!-- Prepare agent for test coverage -->
 					<execution>

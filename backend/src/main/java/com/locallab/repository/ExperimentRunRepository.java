@@ -94,6 +94,26 @@ public interface ExperimentRunRepository extends JpaRepository<ExperimentRun, Lo
     List<ExperimentRun> findByModelName(String modelName);
 
     /**
+     * Finds all runs for a specific experiment and model combination.
+     *
+     * <p>This method enables filtering runs by both experiment and model name, which is useful for
+     * calculating model-specific metrics within a single experiment context.
+     *
+     * <p>For example, to find all runs for a specific model in an experiment:
+     *
+     * <pre>{@code
+     * List<ExperimentRun> modelRuns =
+     *     experimentRunRepository.findByExperimentIdAndModelName(
+     *         experiment.getId(), "qwen2.5-coder:7b");
+     * }</pre>
+     *
+     * @param experimentId the ID of the experiment to filter by
+     * @param modelName the name of the model to filter by
+     * @return a list of experiment runs matching both criteria, or an empty list if none found
+     */
+    List<ExperimentRun> findByExperimentIdAndModelName(Long experimentId, String modelName);
+
+    /**
      * Calculates the average tokens per second for successful runs in an experiment.
      *
      * <p>This aggregation query computes the mean throughput metric across all successful runs,
