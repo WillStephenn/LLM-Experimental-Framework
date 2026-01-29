@@ -594,10 +594,9 @@ class ExperimentControllerTest {
                             .createdAt(LocalDateTime.of(2025, 11, 27, 10, 0))
                             .build();
 
-            when(experimentService.findById(1L))
-                    .thenReturn(draftExperiment)
+            when(experimentService.findById(1L)).thenReturn(draftExperiment);
+            when(experimentService.updateStatus(1L, ExperimentStatus.RUNNING))
                     .thenReturn(startedExperiment);
-            doNothing().when(experimentService).updateStatus(1L, ExperimentStatus.RUNNING);
             when(experimentService.parseConfig(any())).thenReturn(sampleConfig);
             when(experimentService.calculateTotalRuns(any())).thenReturn(6);
 
@@ -653,10 +652,9 @@ class ExperimentControllerTest {
                             .createdAt(LocalDateTime.of(2025, 11, 27, 11, 0))
                             .build();
 
-            when(experimentService.findById(2L))
-                    .thenReturn(runningExperiment)
+            when(experimentService.findById(2L)).thenReturn(runningExperiment);
+            when(experimentService.updateStatus(2L, ExperimentStatus.PAUSED))
                     .thenReturn(pausedExperimentResult);
-            doNothing().when(experimentService).updateStatus(2L, ExperimentStatus.PAUSED);
             when(experimentService.parseConfig(any())).thenReturn(sampleConfig);
             when(experimentService.calculateTotalRuns(any())).thenReturn(5);
 
@@ -700,10 +698,9 @@ class ExperimentControllerTest {
                             .createdAt(LocalDateTime.of(2025, 11, 27, 12, 0))
                             .build();
 
-            when(experimentService.findById(3L))
-                    .thenReturn(pausedExperiment)
+            when(experimentService.findById(3L)).thenReturn(pausedExperiment);
+            when(experimentService.updateStatus(3L, ExperimentStatus.RUNNING))
                     .thenReturn(resumedExperiment);
-            doNothing().when(experimentService).updateStatus(3L, ExperimentStatus.RUNNING);
             when(experimentService.parseConfig(any())).thenReturn(sampleConfig);
             when(experimentService.calculateTotalRuns(any())).thenReturn(2);
 
@@ -748,10 +745,9 @@ class ExperimentControllerTest {
                             .createdAt(LocalDateTime.of(2025, 11, 27, 11, 0))
                             .build();
 
-            when(experimentService.findById(2L))
-                    .thenReturn(runningExperiment)
+            when(experimentService.findById(2L)).thenReturn(runningExperiment);
+            when(experimentService.updateStatus(2L, ExperimentStatus.FAILED))
                     .thenReturn(cancelledExperiment);
-            doNothing().when(experimentService).updateStatus(2L, ExperimentStatus.FAILED);
             when(experimentService.parseConfig(any())).thenReturn(sampleConfig);
             when(experimentService.calculateTotalRuns(any())).thenReturn(5);
 
@@ -775,10 +771,9 @@ class ExperimentControllerTest {
                             .createdAt(LocalDateTime.of(2025, 11, 27, 12, 0))
                             .build();
 
-            when(experimentService.findById(3L))
-                    .thenReturn(pausedExperiment)
+            when(experimentService.findById(3L)).thenReturn(pausedExperiment);
+            when(experimentService.updateStatus(3L, ExperimentStatus.FAILED))
                     .thenReturn(cancelledExperiment);
-            doNothing().when(experimentService).updateStatus(3L, ExperimentStatus.FAILED);
             when(experimentService.parseConfig(any())).thenReturn(sampleConfig);
             when(experimentService.calculateTotalRuns(any())).thenReturn(2);
 

@@ -206,8 +206,7 @@ public class ExperimentController {
                     "Cannot start experiment with status: " + experiment.getStatus());
         }
 
-        experimentService.updateStatus(id, ExperimentStatus.RUNNING);
-        Experiment updatedExperiment = experimentService.findById(id);
+        Experiment updatedExperiment = experimentService.updateStatus(id, ExperimentStatus.RUNNING);
         ExperimentResponse response = toExperimentResponse(updatedExperiment);
 
         LOGGER.info("Started experiment with id: {}", id);
@@ -239,8 +238,7 @@ public class ExperimentController {
                     "Cannot pause experiment with status: " + experiment.getStatus());
         }
 
-        experimentService.updateStatus(id, ExperimentStatus.PAUSED);
-        Experiment updatedExperiment = experimentService.findById(id);
+        Experiment updatedExperiment = experimentService.updateStatus(id, ExperimentStatus.PAUSED);
         ExperimentResponse response = toExperimentResponse(updatedExperiment);
 
         LOGGER.info("Paused experiment with id: {}", id);
@@ -272,8 +270,7 @@ public class ExperimentController {
                     "Cannot resume experiment with status: " + experiment.getStatus());
         }
 
-        experimentService.updateStatus(id, ExperimentStatus.RUNNING);
-        Experiment updatedExperiment = experimentService.findById(id);
+        Experiment updatedExperiment = experimentService.updateStatus(id, ExperimentStatus.RUNNING);
         ExperimentResponse response = toExperimentResponse(updatedExperiment);
 
         LOGGER.info("Resumed experiment with id: {}", id);
@@ -306,8 +303,7 @@ public class ExperimentController {
                     "Cannot cancel experiment with status: " + experiment.getStatus());
         }
 
-        experimentService.updateStatus(id, ExperimentStatus.FAILED);
-        Experiment updatedExperiment = experimentService.findById(id);
+        Experiment updatedExperiment = experimentService.updateStatus(id, ExperimentStatus.FAILED);
         ExperimentResponse response = toExperimentResponse(updatedExperiment);
 
         LOGGER.info("Cancelled experiment with id: {}", id);

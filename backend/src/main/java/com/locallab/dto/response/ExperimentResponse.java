@@ -100,14 +100,17 @@ public class ExperimentResponse {
                             .build();
         }
 
-        int completedRuns =
-                (int)
-                        experiment.getRuns().stream()
-                                .filter(
-                                        run ->
-                                                run.getStatus() == RunStatus.SUCCESS
-                                                        || run.getStatus() == RunStatus.FAILED)
-                                .count();
+        int completedRuns = 0;
+        if (experiment.getRuns() != null) {
+            completedRuns =
+                    (int)
+                            experiment.getRuns().stream()
+                                    .filter(
+                                            run ->
+                                                    run.getStatus() == RunStatus.SUCCESS
+                                                            || run.getStatus() == RunStatus.FAILED)
+                                    .count();
+        }
 
         return ExperimentResponse.builder()
                 .id(experiment.getId())
