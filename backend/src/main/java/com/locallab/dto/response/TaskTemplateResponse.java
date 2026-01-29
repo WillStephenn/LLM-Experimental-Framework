@@ -64,10 +64,14 @@ public class TaskTemplateResponse {
      *
      * <p>This factory method provides a convenient way to convert entity objects to response DTOs.
      *
-     * @param taskTemplate the task template entity to convert
+     * @param taskTemplate the task template entity to convert (must not be null)
      * @return a new TaskTemplateResponse containing all entity data
+     * @throws IllegalArgumentException if taskTemplate is null
      */
     public static TaskTemplateResponse fromEntity(TaskTemplate taskTemplate) {
+        if (taskTemplate == null) {
+            throw new IllegalArgumentException("TaskTemplate must not be null");
+        }
         return TaskTemplateResponse.builder()
                 .id(taskTemplate.getId())
                 .name(taskTemplate.getName())
