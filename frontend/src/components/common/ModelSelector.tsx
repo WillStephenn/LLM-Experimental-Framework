@@ -177,6 +177,7 @@ export function ModelSelector({
 
   // Error state
   if (error || !isAvailable) {
+    const errorMessage = error?.message ?? 'Ollama service unavailable';
     return (
       <div className={`space-y-1 ${className ?? ''}`} data-testid={testId}>
         {label && <span className="text-sm font-medium text-gray-700">{label}</span>}
@@ -186,7 +187,7 @@ export function ModelSelector({
         >
           <div className="flex items-center gap-2">
             <AlertIcon className="w-4 h-4 text-error" />
-            <span className="text-sm text-error">{error ?? 'Ollama service unavailable'}</span>
+            <span className="text-sm text-error">{errorMessage}</span>
           </div>
           <button
             type="button"
@@ -234,7 +235,8 @@ export function ModelSelector({
       >
         <Select.Trigger
           className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green focus:border-brand-green transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          aria-labelledby={`${testId}-label`}
+          aria-labelledby={label ? `${testId}-label` : undefined}
+          aria-label={label ? undefined : 'Model selector'}
           data-testid={`${testId}-trigger`}
         >
           <Select.Value placeholder="Select a model..." />

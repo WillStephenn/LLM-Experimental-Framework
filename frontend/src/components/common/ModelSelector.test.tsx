@@ -66,7 +66,7 @@ describe('ModelSelector', () => {
       mockUseOllama.mockReturnValue({
         models: [],
         isLoading: false,
-        error: 'Cannot connect to Ollama service',
+        error: new Error('Cannot connect to Ollama service'),
         isAvailable: false,
         refetch: mockRefetch,
       });
@@ -96,7 +96,7 @@ describe('ModelSelector', () => {
       mockUseOllama.mockReturnValue({
         models: [],
         isLoading: false,
-        error: 'Connection failed',
+        error: new Error('Connection failed'),
         isAvailable: false,
         refetch: mockRefetch,
       });
@@ -112,7 +112,7 @@ describe('ModelSelector', () => {
       mockUseOllama.mockReturnValue({
         models: [],
         isLoading: false,
-        error: 'Connection failed',
+        error: new Error('Connection failed'),
         isAvailable: false,
         refetch: mockRefetch,
       });
@@ -270,7 +270,7 @@ describe('ModelSelector', () => {
       mockUseOllama.mockReturnValue({
         models: [],
         isLoading: false,
-        error: 'Error',
+        error: new Error('Error'),
         isAvailable: false,
         refetch: mockRefetch,
       });

@@ -575,15 +575,15 @@ describe('useOllama', () => {
         return Promise.reject(new Error('Unknown endpoint'));
       });
 
-      renderHook(() => useOllama());
+      const { result } = renderHook(() => useOllama());
 
       await waitFor(() => {
-        expect(mockApi.get).toHaveBeenCalledWith('/ollama/status');
+        expect(result.current.isLoading).toBe(false);
       });
 
-      await waitFor(() => {
-        expect(mockApi.get).toHaveBeenCalledWith('/ollama/models');
-      });
+      expect(mockApi.get).toHaveBeenCalledTimes(2);
+      expect(mockApi.get).toHaveBeenNthCalledWith(1, '/ollama/status');
+      expect(mockApi.get).toHaveBeenNthCalledWith(2, '/ollama/models');
     });
   });
 
@@ -608,7 +608,8 @@ describe('useOllama', () => {
       });
 
       expect(result.current.isAvailable).toBe(false);
-      expect(result.current.error).toBe('Cannot connect to Ollama service');
+      expect(result.current.error).toBeInstanceOf(Error);
+      expect(result.current.error?.message).toBe('Cannot connect to Ollama service');
       expect(result.current.models).toEqual([]);
     });
 
@@ -631,7 +632,8 @@ describe('useOllama', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.error).toBe('Ollama service is not available');
+      expect(result.current.error).toBeInstanceOf(Error);
+      expect(result.current.error?.message).toBe('Ollama service is not available');
     });
   });
 
@@ -646,7 +648,8 @@ describe('useOllama', () => {
       });
 
       expect(result.current.isAvailable).toBe(false);
-      expect(result.current.error).toBe('Network error - unable to connect to the server');
+      expect(result.current.error).toBeInstanceOf(Error);
+      expect(result.current.error?.message).toBe('Network error - unable to connect to the server');
       expect(result.current.models).toEqual([]);
     });
 
@@ -673,7 +676,8 @@ describe('useOllama', () => {
       });
 
       expect(result.current.isAvailable).toBe(false);
-      expect(result.current.error).toBe('Connection refused');
+      expect(result.current.error).toBeInstanceOf(Error);
+      expect(result.current.error?.message).toBe('Connection refused');
       expect(result.current.models).toEqual([]);
     });
 
@@ -686,7 +690,8 @@ describe('useOllama', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.error).toBe('Failed to connect to Ollama service');
+      expect(result.current.error).toBeInstanceOf(Error);
+      expect(result.current.error?.message).toBe('Failed to connect to Ollama service');
     });
   });
 
@@ -780,7 +785,8 @@ describe('useOllama', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.error).toBe('Connection failed');
+      expect(result.current.error).toBeInstanceOf(Error);
+      expect(result.current.error?.message).toBe('Connection failed');
 
       // Fix the issue and refetch
       shouldFail = false;

@@ -71,8 +71,8 @@ export interface UseOllamaState {
   models: string[];
   /** Whether the request is currently loading. */
   isLoading: boolean;
-  /** Error message if fetching failed. */
-  error: string | null;
+  /** Error that occurred during fetching, if any. */
+  error: Error | null;
   /** Whether Ollama service is available. */
   isAvailable: boolean;
 }
@@ -175,7 +175,7 @@ export const useOllamaModels = (): UseOllamaModelsState => {
     }
   }, []);
 
-  const refetch = useCallback((): void => {
+  const refetch = useCallback(() => {
     void fetchModels(true);
   }, [fetchModels]);
 
@@ -244,7 +244,7 @@ export const useOllamaStatus = (): UseOllamaStatusState => {
     }
   }, []);
 
-  const refetch = useCallback((): void => {
+  const refetch = useCallback(() => {
     void fetchStatus();
   }, [fetchStatus]);
 
@@ -343,7 +343,7 @@ export const useGenerate = (): UseGenerateState => {
     []
   );
 
-  const reset = useCallback((): void => {
+  const reset = useCallback(() => {
     setResponse(null);
     setError(null);
     setIsLoading(false);
@@ -362,9 +362,9 @@ export const clearModelsCache = (): void => {
 };
 
 /**
- * Fetches models from the Ollama API with status check.
- * This function is separate from the hook to avoid triggering ESLint warnings
- * about setState in effects.
+ * Fetches models from the Ollama API with a preceding status check.
+ * Extracted from the hook so the fetch logic can be reused (e.g. in effects
+ * and refetch handlers) and tested in isolation without React hook concerns.
  * @internal
  */
 async function fetchOllamaWithStatus(): Promise<UseOllamaState> {
@@ -376,7 +376,7 @@ async function fetchOllamaWithStatus(): Promise<UseOllamaState> {
       return {
         models: [],
         isLoading: false,
-        error: statusResponse.message || 'Ollama service is not available',
+        error: new Error(statusResponse.message || 'Ollama service is not available'),
         isAvailable: false,
       };
     }
@@ -391,12 +391,12 @@ async function fetchOllamaWithStatus(): Promise<UseOllamaState> {
       isAvailable: true,
     };
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Failed to connect to Ollama service';
+    const error = err instanceof Error ? err : new Error('Failed to connect to Ollama service');
 
     return {
       models: [],
       isLoading: false,
-      error: errorMessage,
+      error,
       isAvailable: false,
     };
   }
@@ -433,22 +433,26 @@ export function useOllama(): UseOllamaReturn {
   });
 
   const isMounted = useRef(true);
+  const requestIdRef = useRef(0);
 
   const refetch = useCallback(async (): Promise<void> => {
+    const currentRequestId = ++requestIdRef.current;
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     const result = await fetchOllamaWithStatus();
-    if (isMounted.current) {
+    // Only update state if this is still the latest request and component is mounted
+    if (isMounted.current && currentRequestId === requestIdRef.current) {
       setState(result);
     }
   }, []);
 
   useEffect(() => {
     isMounted.current = true;
-    let isCurrentEffect = true;
+    const currentRequestId = ++requestIdRef.current;
 
     const loadModels = async (): Promise<void> => {
       const result = await fetchOllamaWithStatus();
-      if (isCurrentEffect && isMounted.current) {
+      // Only update state if this is still the latest request and component is mounted
+      if (isMounted.current && currentRequestId === requestIdRef.current) {
         setState(result);
       }
     };
@@ -456,7 +460,6 @@ export function useOllama(): UseOllamaReturn {
     void loadModels();
 
     return (): void => {
-      isCurrentEffect = false;
       isMounted.current = false;
     };
   }, []);
