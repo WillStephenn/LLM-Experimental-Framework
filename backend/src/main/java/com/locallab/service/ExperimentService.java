@@ -240,17 +240,19 @@ public class ExperimentService {
      *
      * @param id the identifier of the experiment to update
      * @param status the new status to set
+     * @return the updated experiment
      * @throws EntityNotFoundException if no experiment exists with the given identifier
      */
     @Transactional
-    public void updateStatus(Long id, ExperimentStatus status) {
+    public Experiment updateStatus(Long id, ExperimentStatus status) {
         LOGGER.info("Updating experiment {} status to: {}", id, status);
 
         Experiment experiment = findById(id);
         experiment.setStatus(status);
-        experimentRepository.save(experiment);
+        Experiment savedExperiment = experimentRepository.save(experiment);
 
         LOGGER.info("Updated experiment {} status to: {}", id, status);
+        return savedExperiment;
     }
 
     /**
