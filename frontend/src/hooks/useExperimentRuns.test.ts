@@ -141,6 +141,7 @@ describe('useExperimentRuns', () => {
       });
 
       expect(api.get).toHaveBeenCalledWith('/experiments/1/runs');
+      expect(api.get).toHaveBeenCalledTimes(1);
     });
 
     it('does not fetch automatically when experimentId is not provided', () => {

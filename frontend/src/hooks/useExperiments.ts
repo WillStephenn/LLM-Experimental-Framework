@@ -280,7 +280,8 @@ export const useExperiments = (autoFetch = true): UseExperimentsReturn => {
         // Error is already handled in state
       });
     }
-  }, [autoFetch, fetchExperiments]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchExperiments is stable (only uses setters)
+  }, [autoFetch]);
 
   return {
     // State

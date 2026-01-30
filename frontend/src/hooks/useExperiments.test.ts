@@ -124,6 +124,7 @@ describe('useExperiments', () => {
       });
 
       expect(api.get).toHaveBeenCalledWith('/experiments');
+      expect(api.get).toHaveBeenCalledTimes(1);
     });
 
     it('does not fetch automatically when autoFetch is false', () => {

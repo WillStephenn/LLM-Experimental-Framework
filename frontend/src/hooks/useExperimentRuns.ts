@@ -201,7 +201,8 @@ export const useExperimentRuns = (experimentId?: number): UseExperimentRunsRetur
         // Error is already handled in state
       });
     }
-  }, [experimentId, fetchRuns]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchRuns is stable (only uses setters)
+  }, [experimentId]);
 
   return {
     // State
