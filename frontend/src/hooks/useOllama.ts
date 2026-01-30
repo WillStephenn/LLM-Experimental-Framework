@@ -62,6 +62,29 @@ export interface UseGenerateState {
   reset: () => void;
 }
 
+/**
+ * State interface for the combined useOllama hook.
+ * Combines status checking with model fetching for convenience.
+ */
+export interface UseOllamaState {
+  /** List of available model names. */
+  models: string[];
+  /** Whether the request is currently loading. */
+  isLoading: boolean;
+  /** Error that occurred during fetching, if any. */
+  error: Error | null;
+  /** Whether Ollama service is available. */
+  isAvailable: boolean;
+}
+
+/**
+ * Return type for the combined useOllama hook.
+ */
+export interface UseOllamaReturn extends UseOllamaState {
+  /** Refresh the models list. */
+  refetch: () => Promise<void>;
+}
+
 /** Cache duration for models in milliseconds (30 seconds). */
 const MODELS_CACHE_DURATION_MS = 30000;
 
@@ -115,7 +138,7 @@ export const useOllamaModels = (): UseOllamaModelsState => {
   const [error, setError] = useState<Error | null>(null);
   const isMountedRef = useRef<boolean>(true);
 
-  const fetchModels = useCallback(async (forceRefresh = false) => {
+  const fetchModels = useCallback(async (forceRefresh = false): Promise<void> => {
     // Use cache if valid and not forcing refresh
     if (!forceRefresh && isCacheValid(modelsCache)) {
       setModels(modelsCache!.data);
@@ -152,7 +175,7 @@ export const useOllamaModels = (): UseOllamaModelsState => {
     }
   }, []);
 
-  const refetch = useCallback((): void => {
+  const refetch = useCallback(() => {
     void fetchModels(true);
   }, [fetchModels]);
 
@@ -160,7 +183,7 @@ export const useOllamaModels = (): UseOllamaModelsState => {
     isMountedRef.current = true;
     void fetchModels();
 
-    return () => {
+    return (): void => {
       isMountedRef.current = false;
     };
   }, [fetchModels]);
@@ -198,7 +221,7 @@ export const useOllamaStatus = (): UseOllamaStatusState => {
   const [error, setError] = useState<Error | null>(null);
   const isMountedRef = useRef<boolean>(true);
 
-  const fetchStatus = useCallback(async () => {
+  const fetchStatus = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
 
@@ -221,7 +244,7 @@ export const useOllamaStatus = (): UseOllamaStatusState => {
     }
   }, []);
 
-  const refetch = useCallback((): void => {
+  const refetch = useCallback(() => {
     void fetchStatus();
   }, [fetchStatus]);
 
@@ -229,7 +252,7 @@ export const useOllamaStatus = (): UseOllamaStatusState => {
     isMountedRef.current = true;
     void fetchStatus();
 
-    return () => {
+    return (): void => {
       isMountedRef.current = false;
     };
   }, [fetchStatus]);
@@ -283,7 +306,7 @@ export const useGenerate = (): UseGenerateState => {
   useEffect(() => {
     isMountedRef.current = true;
 
-    return () => {
+    return (): void => {
       isMountedRef.current = false;
     };
   }, []);
@@ -320,7 +343,7 @@ export const useGenerate = (): UseGenerateState => {
     []
   );
 
-  const reset = useCallback((): void => {
+  const reset = useCallback(() => {
     setResponse(null);
     setError(null);
     setIsLoading(false);
@@ -337,3 +360,130 @@ export const useGenerate = (): UseGenerateState => {
 export const clearModelsCache = (): void => {
   modelsCache = null;
 };
+
+/**
+ * Fetches models from the Ollama API with a preceding status check.
+ * Extracted from the hook so the fetch logic can be reused (e.g. in effects
+ * and refetch handlers) and tested in isolation without React hook concerns.
+ *
+ * @param forceRefresh - If true, bypasses the shared models cache
+ * @internal
+ */
+async function fetchOllamaWithStatus(forceRefresh = false): Promise<UseOllamaState> {
+  try {
+    // First check if Ollama is available
+    const statusResponse = await api.get<OllamaStatusResponse>('/ollama/status');
+
+    if (!statusResponse.available) {
+      return {
+        models: [],
+        isLoading: false,
+        error: new Error(statusResponse.message || 'Ollama service is not available'),
+        isAvailable: false,
+      };
+    }
+
+    // Use shared cache if valid and not forcing refresh
+    if (!forceRefresh && isCacheValid(modelsCache)) {
+      return {
+        models: modelsCache!.data,
+        isLoading: false,
+        error: null,
+        isAvailable: true,
+      };
+    }
+
+    // Fetch models if Ollama is available
+    const modelsResponse = await api.get<ModelsResponse>('/ollama/models');
+
+    // Update shared cache
+    modelsCache = {
+      data: modelsResponse.models,
+      timestamp: Date.now(),
+    };
+
+    return {
+      models: modelsResponse.models,
+      isLoading: false,
+      error: null,
+      isAvailable: true,
+    };
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error('Failed to connect to Ollama service');
+
+    return {
+      models: [],
+      isLoading: false,
+      error,
+      isAvailable: false,
+    };
+  }
+}
+
+/**
+ * Combined hook for fetching and managing Ollama models with status checking.
+ *
+ * This is a convenience hook that checks Ollama availability before fetching models.
+ * It combines the functionality of useOllamaStatus and useOllamaModels into a single call.
+ *
+ * Use this hook when you need both status checking and model fetching together,
+ * such as in the ModelSelector component.
+ *
+ * @returns {UseOllamaReturn} Hook state and actions
+ *
+ * @example
+ * ```tsx
+ * const { models, isLoading, error, isAvailable, refetch } = useOllama();
+ *
+ * if (isLoading) return <Spinner />;
+ * if (error) return <ErrorMessage message={error} />;
+ * if (!isAvailable) return <OllamaUnavailable />;
+ *
+ * return <ModelList models={models} />;
+ * ```
+ */
+export function useOllama(): UseOllamaReturn {
+  const [state, setState] = useState<UseOllamaState>({
+    models: [],
+    isLoading: true,
+    error: null,
+    isAvailable: false,
+  });
+
+  const isMounted = useRef(true);
+  const requestIdRef = useRef(0);
+
+  const refetch = useCallback(async (): Promise<void> => {
+    const currentRequestId = ++requestIdRef.current;
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    const result = await fetchOllamaWithStatus(true); // Force refresh on manual refetch
+    // Only update state if this is still the latest request and component is mounted
+    if (isMounted.current && currentRequestId === requestIdRef.current) {
+      setState(result);
+    }
+  }, []);
+
+  useEffect(() => {
+    isMounted.current = true;
+    const currentRequestId = ++requestIdRef.current;
+
+    const loadModels = async (): Promise<void> => {
+      const result = await fetchOllamaWithStatus();
+      // Only update state if this is still the latest request and component is mounted
+      if (isMounted.current && currentRequestId === requestIdRef.current) {
+        setState(result);
+      }
+    };
+
+    void loadModels();
+
+    return (): void => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  return {
+    ...state,
+    refetch,
+  };
+}
