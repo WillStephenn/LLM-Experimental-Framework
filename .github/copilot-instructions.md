@@ -18,7 +18,7 @@
    - Do NOT write tests for pure Lombok-generated classes (entities with only @Data, DTOs with no custom logic)
    - No task is complete until all tests pass
    - No task is complete until `mvn clean verify` passes (backend)
-   - No task is complete until `npm run build` and `npm run test` pass (frontend)
+   - No task is complete until the full frontend CI chain passes: `npm ci && npm run lint && npm run format:check && npx tsc --noEmit && npm run test && npm run build` (frontend)
 
 **A task is NOT complete unless:**
 - All existing tests pass
@@ -86,8 +86,10 @@ Only read-only git interactions are permitted. Do not perform any git write oper
 6. **Run `npm run lint` and `npm run test`** before considering the task complete
 
 ### Quality Gates
-- **No TypeScript errors**: `npm run type-check` must pass
+- **Full CI Check**: Must pass `npm ci && npm run lint && npm run format:check && npx tsc --noEmit && npm run test && npm run build`
+- **No TypeScript errors**: `npx tsc --noEmit` must pass
 - **No lint errors**: `npm run lint` must pass
+- **Formatting**: `npm run format:check` must pass
 - **All tests pass**: `npm run test` must pass
 - **Builds successfully**: `npm run build` must pass
 - **Coverage met**: 80% line coverage for new code
@@ -498,7 +500,8 @@ npm run lint                               # ESLint check
 npm run lint:fix                           # ESLint auto-fix
 npm run test                               # Run Vitest tests
 npm run test:coverage                      # Run tests with coverage
-npm run type-check                         # TypeScript type checking
+npm run format:check                       # Check formatting (Prettier)
+npx tsc --noEmit                           # TypeScript type checking
 
 # Infrastructure
 docker-compose up -d chroma                # Start Chroma on :8000
