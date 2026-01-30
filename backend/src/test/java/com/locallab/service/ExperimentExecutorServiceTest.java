@@ -18,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.locallab.dto.ExperimentConfig;
@@ -26,7 +25,6 @@ import com.locallab.dto.ExperimentExecutionState;
 import com.locallab.dto.ExperimentProgress;
 import com.locallab.dto.Hyperparameters;
 import com.locallab.dto.RetrievedChunk;
-import com.locallab.dto.WebSocketMessage;
 import com.locallab.dto.request.GenerationRequest;
 import com.locallab.dto.response.GenerationResponse;
 import com.locallab.model.Experiment;
@@ -60,7 +58,7 @@ class ExperimentExecutorServiceTest {
     @Mock private RagService ragService;
     @Mock private TaskService taskService;
     @Mock private SystemPromptRepository systemPromptRepository;
-    @Mock private SimpMessagingTemplate messagingTemplate;
+    @Mock private ExperimentWebSocketHandler webSocketHandler;
 
     private ObjectMapper objectMapper;
     private ExperimentExecutorService experimentExecutorService;
@@ -76,7 +74,7 @@ class ExperimentExecutorServiceTest {
                         ragService,
                         taskService,
                         systemPromptRepository,
-                        messagingTemplate,
+                        webSocketHandler,
                         objectMapper);
     }
 
@@ -263,9 +261,14 @@ class ExperimentExecutorServiceTest {
             Thread.sleep(500);
 
             verify(experimentRepository, atLeastOnce()).save(any(Experiment.class));
-            verify(messagingTemplate, atLeastOnce())
-                    .convertAndSend(
-                            eq("/topic/experiments/1/progress"), any(WebSocketMessage.class));
+            verify(webSocketHandler, atLeastOnce())
+                    .broadcastExperimentCompleted(
+                            eq(1L),
+                            any(ExperimentStatus.class),
+                            anyInt(),
+                            anyInt(),
+                            anyInt(),
+                            any());
         }
 
         @Test
@@ -858,9 +861,14 @@ class ExperimentExecutorServiceTest {
 
             Thread.sleep(500);
 
-            verify(messagingTemplate, atLeastOnce())
-                    .convertAndSend(
-                            eq("/topic/experiments/1/progress"), any(WebSocketMessage.class));
+            verify(webSocketHandler, atLeastOnce())
+                    .broadcastExperimentCompleted(
+                            eq(1L),
+                            any(ExperimentStatus.class),
+                            anyInt(),
+                            anyInt(),
+                            anyInt(),
+                            any());
         }
     }
 
