@@ -229,7 +229,7 @@ export function ModelSelector({
         </label>
       )}
       <Select.Root
-        value={selectedModel ?? undefined}
+        value={selectedModel ?? ''}
         onValueChange={handleValueChange}
         disabled={disabled}
       >

@@ -1,6 +1,58 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import App from '../App';
+
+vi.mock(
+  '@/hooks/useSystemPrompts',
+  (): {
+    useSystemPrompts: () => {
+      systemPrompts: [];
+      systemPrompt: null;
+      isLoading: false;
+      error: null;
+      fetchSystemPrompts: () => void;
+      fetchSystemPrompt: () => void;
+      createSystemPrompt: () => void;
+      updateSystemPrompt: () => void;
+      deleteSystemPrompt: () => void;
+      clearError: () => void;
+    };
+  } => ({
+    useSystemPrompts: () => ({
+      systemPrompts: [],
+      systemPrompt: null,
+      isLoading: false,
+      error: null,
+      fetchSystemPrompts: vi.fn(),
+      fetchSystemPrompt: vi.fn(),
+      createSystemPrompt: vi.fn(),
+      updateSystemPrompt: vi.fn(),
+      deleteSystemPrompt: vi.fn(),
+      clearError: vi.fn(),
+    }),
+  })
+);
+
+vi.mock('@/hooks/useOllama', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/hooks/useOllama')>();
+  return {
+    ...actual,
+    useOllama: vi.fn(() => ({
+      models: ['llama3:8b'],
+      isLoading: false,
+      error: null,
+      isAvailable: true,
+      refetch: vi.fn(),
+    })),
+    useGenerate: vi.fn(() => ({
+      response: null,
+      isLoading: false,
+      error: null,
+      generate: vi.fn(),
+      reset: vi.fn(),
+    })),
+  };
+});
 
 describe('App', () => {
   it('renders without crashing', () => {
