@@ -12,8 +12,8 @@ export function ArenaPage(): React.JSX.Element {
       </div>
       <div className="bg-white rounded-lg shadow p-6">
         <p className="text-gray-600">
-          Model comparison arena coming soon. Run the same prompt across
-          multiple models and compare outputs.
+          Model comparison arena coming soon. Run the same prompt across multiple models and compare
+          outputs.
         </p>
       </div>
     </div>

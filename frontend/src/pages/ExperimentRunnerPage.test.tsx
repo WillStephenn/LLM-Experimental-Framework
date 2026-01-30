@@ -12,7 +12,7 @@ describe('ExperimentRunnerPage', () => {
         </Routes>
       </MemoryRouter>
     );
-    
+
     expect(screen.getByTestId('experiment-runner-page')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Experiment Runner' })).toBeInTheDocument();
   });
@@ -25,7 +25,7 @@ describe('ExperimentRunnerPage', () => {
         </Routes>
       </MemoryRouter>
     );
-    
+
     expect(screen.getByText(/Running experiment: test-123/)).toBeInTheDocument();
   });
 

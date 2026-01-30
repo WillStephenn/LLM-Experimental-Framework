@@ -5,7 +5,7 @@ import { ResultsDashboardPage } from './ResultsDashboardPage';
 describe('ResultsDashboardPage', () => {
   it('renders the page with title and description', () => {
     render(<ResultsDashboardPage />);
-    
+
     expect(screen.getByTestId('results-dashboard-page')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Results Dashboard' })).toBeInTheDocument();
     expect(screen.getByText('View and analyse experiment results')).toBeInTheDocument();

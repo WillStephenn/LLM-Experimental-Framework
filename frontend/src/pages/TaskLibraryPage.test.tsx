@@ -5,7 +5,7 @@ import { TaskLibraryPage } from './TaskLibraryPage';
 describe('TaskLibraryPage', () => {
   it('renders the page with title and description', () => {
     render(<TaskLibraryPage />);
-    
+
     expect(screen.getByTestId('task-library-page')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Task Library' })).toBeInTheDocument();
     expect(screen.getByText('Browse and manage task templates')).toBeInTheDocument();

@@ -5,7 +5,7 @@ import { EmbeddingAnalyserPage } from './EmbeddingAnalyserPage';
 describe('EmbeddingAnalyserPage', () => {
   it('renders the page with title and description', () => {
     render(<EmbeddingAnalyserPage />);
-    
+
     expect(screen.getByTestId('embedding-analyser-page')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Embedding Analyser' })).toBeInTheDocument();
     expect(screen.getByText('Analyse and visualise embeddings')).toBeInTheDocument();

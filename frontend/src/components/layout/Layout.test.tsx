@@ -7,10 +7,7 @@ import { Layout } from './Layout';
 /**
  * Test wrapper that provides routing context
  */
-function renderWithRouter(
-  ui: React.ReactElement,
-  { route = '/' } = {}
-): RenderResult {
+function renderWithRouter(ui: React.ReactElement, { route = '/' } = {}): RenderResult {
   return render(<MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>);
 }
 
@@ -31,7 +28,7 @@ describe('Layout', () => {
   it('renders all navigation items', () => {
     renderWithRouter(<Layout />);
     const nav = screen.getByRole('navigation');
-    
+
     expect(within(nav).getByText('Sandbox')).toBeInTheDocument();
     expect(within(nav).getByText('Arena')).toBeInTheDocument();
     expect(within(nav).getByText('RAG Lab')).toBeInTheDocument();

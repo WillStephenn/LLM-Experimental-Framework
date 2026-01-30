@@ -35,13 +35,7 @@ const navItems: NavItem[] = [
 /**
  * Icon component that renders appropriate SVG icons
  */
-function NavIcon({
-  name,
-  className,
-}: {
-  name: string;
-  className?: string;
-}): React.JSX.Element {
+function NavIcon({ name, className }: { name: string; className?: string }): React.JSX.Element {
   const iconClass = className ?? 'w-5 h-5';
 
   switch (name) {
@@ -221,9 +215,7 @@ export function Sidebar(): React.JSX.Element {
             >
               LocalLab
             </h1>
-            <p className="text-xs text-white/70 font-sans">
-              LLM Experimental Framework
-            </p>
+            <p className="text-xs text-white/70 font-sans">LLM Experimental Framework</p>
           </div>
         </div>
       </div>
@@ -254,9 +246,7 @@ export function Sidebar(): React.JSX.Element {
 
       {/* Footer */}
       <div className="p-4 border-t border-white/10">
-        <p className="text-xs text-white/50 text-center">
-          Local-first LLM framework
-        </p>
+        <p className="text-xs text-white/50 text-center">Local-first LLM framework</p>
       </div>
     </aside>
   );

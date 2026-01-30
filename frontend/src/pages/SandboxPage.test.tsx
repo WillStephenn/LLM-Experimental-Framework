@@ -5,7 +5,7 @@ import { SandboxPage } from './SandboxPage';
 describe('SandboxPage', () => {
   it('renders the page with title and description', () => {
     render(<SandboxPage />);
-    
+
     expect(screen.getByTestId('sandbox-page')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Sandbox' })).toBeInTheDocument();
     expect(screen.getByText('Experiment with models in real-time')).toBeInTheDocument();

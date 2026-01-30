@@ -7,10 +7,7 @@ import { Sidebar } from './Sidebar';
 /**
  * Test wrapper that provides routing context
  */
-function renderWithRouter(
-  ui: React.ReactElement,
-  { route = '/' } = {}
-): RenderResult {
+function renderWithRouter(ui: React.ReactElement, { route = '/' } = {}): RenderResult {
   return render(<MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>);
 }
 
@@ -23,7 +20,7 @@ describe('Sidebar', () => {
 
   it('renders all navigation links with correct hrefs', () => {
     renderWithRouter(<Sidebar />);
-    
+
     const sandboxLink = screen.getByTestId('nav-sandbox');
     expect(sandboxLink).toHaveAttribute('href', '/sandbox');
 
@@ -48,10 +45,10 @@ describe('Sidebar', () => {
 
   it('highlights the active route', () => {
     renderWithRouter(<Sidebar />, { route: '/sandbox' });
-    
+
     const sandboxLink = screen.getByTestId('nav-sandbox');
     expect(sandboxLink).toHaveClass('bg-brand-orange');
-    
+
     const arenaLink = screen.getByTestId('nav-arena');
     expect(arenaLink).not.toHaveClass('bg-brand-orange');
   });
