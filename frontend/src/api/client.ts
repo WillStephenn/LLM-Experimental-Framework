@@ -110,15 +110,17 @@ const createApiClient = (): AxiosInstance => {
 
 /**
  * Check if the data is FormData (for multipart uploads).
+ * @internal Exported for testing purposes
  */
-const isFormData = (data: unknown): data is FormData => {
+export const isFormData = (data: unknown): data is FormData => {
   return typeof FormData !== 'undefined' && data instanceof FormData;
 };
 
 /**
  * Transform Axios error into a structured ApiError or preserve network errors.
+ * @internal Exported for testing purposes
  */
-const transformError = (error: AxiosError<ApiErrorResponse>): Error => {
+export const transformError = (error: AxiosError<ApiErrorResponse>): Error => {
   // Handle network errors (no response received)
   if (!error.response) {
     const networkError = new Error(
@@ -147,20 +149,21 @@ const transformError = (error: AxiosError<ApiErrorResponse>): Error => {
     timestamp: new Date().toISOString(),
     status,
     error: getDefaultErrorType(status),
-    message: error.message ?? 'An unexpected error occurred',
+    message: error.message || 'An unexpected error occurred',
     path: error.config?.url ?? '',
   });
 };
 
 /**
  * Get default error type string based on HTTP status code.
+ * @internal Exported for testing purposes
  */
-const getDefaultErrorType = (status: number): string => {
+export const getDefaultErrorType = (status: number): string => {
   switch (status) {
     case 400:
       return 'Bad Request';
     case 401:
-      return 'Unauthorised';
+      return 'Unauthorized';
     case 403:
       return 'Forbidden';
     case 404:

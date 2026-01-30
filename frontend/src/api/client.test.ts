@@ -4,8 +4,16 @@
  * @module api/client.test
  */
 import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
-import { type AxiosResponse } from 'axios';
-import { api, apiClient, ApiError, type ApiErrorResponse } from './client';
+import { type AxiosError, type AxiosResponse } from 'axios';
+import {
+  api,
+  apiClient,
+  ApiError,
+  type ApiErrorResponse,
+  isFormData,
+  transformError,
+  getDefaultErrorType,
+} from './client';
 
 describe('ApiError', () => {
   it('should create an ApiError with all properties', () => {
@@ -152,5 +160,196 @@ describe('api convenience methods', () => {
 
     expect(patchMock).toHaveBeenCalledWith('/tasks/1', body, undefined);
     expect(result).toEqual({ id: 1, name: 'Test' });
+  });
+});
+
+describe('isFormData', () => {
+  it('should return true for FormData instances', () => {
+    const formData = new FormData();
+    expect(isFormData(formData)).toBe(true);
+  });
+
+  it('should return false for plain objects', () => {
+    expect(isFormData({ foo: 'bar' })).toBe(false);
+  });
+
+  it('should return false for null', () => {
+    expect(isFormData(null)).toBe(false);
+  });
+
+  it('should return false for undefined', () => {
+    expect(isFormData(undefined)).toBe(false);
+  });
+
+  it('should return false for strings', () => {
+    expect(isFormData('string')).toBe(false);
+  });
+
+  it('should return false for arrays', () => {
+    expect(isFormData([1, 2, 3])).toBe(false);
+  });
+});
+
+describe('getDefaultErrorType', () => {
+  it('should return "Bad Request" for status 400', () => {
+    expect(getDefaultErrorType(400)).toBe('Bad Request');
+  });
+
+  it('should return "Unauthorized" for status 401', () => {
+    expect(getDefaultErrorType(401)).toBe('Unauthorized');
+  });
+
+  it('should return "Forbidden" for status 403', () => {
+    expect(getDefaultErrorType(403)).toBe('Forbidden');
+  });
+
+  it('should return "Not Found" for status 404', () => {
+    expect(getDefaultErrorType(404)).toBe('Not Found');
+  });
+
+  it('should return "Conflict" for status 409', () => {
+    expect(getDefaultErrorType(409)).toBe('Conflict');
+  });
+
+  it('should return "Internal Server Error" for status 500', () => {
+    expect(getDefaultErrorType(500)).toBe('Internal Server Error');
+  });
+
+  it('should return "Service Unavailable" for status 503', () => {
+    expect(getDefaultErrorType(503)).toBe('Service Unavailable');
+  });
+
+  it('should return "Error" for unknown status codes', () => {
+    expect(getDefaultErrorType(418)).toBe('Error');
+    expect(getDefaultErrorType(999)).toBe('Error');
+  });
+});
+
+describe('transformError', () => {
+  it('should transform network error without response', () => {
+    const axiosError = {
+      response: undefined,
+      message: 'Network Error',
+      config: { url: '/api/tasks' },
+    } as unknown as AxiosError<ApiErrorResponse>;
+
+    const error = transformError(axiosError);
+
+    expect(error.name).toBe('NetworkError');
+    expect(error.message).toBe('Network Error');
+  });
+
+  it('should use default message for network error without message', () => {
+    const axiosError = {
+      response: undefined,
+      message: '',
+      config: { url: '/api/tasks' },
+    } as unknown as AxiosError<ApiErrorResponse>;
+
+    const error = transformError(axiosError);
+
+    expect(error.name).toBe('NetworkError');
+    expect(error.message).toBe('Network error - unable to connect to the server');
+  });
+
+  it('should transform structured API error response to ApiError', () => {
+    const axiosError = {
+      response: {
+        data: {
+          timestamp: '2025-11-27T10:00:00Z',
+          status: 400,
+          error: 'Bad Request',
+          message: 'Validation failed',
+          path: '/api/tasks',
+          fieldErrors: [{ field: 'name', message: 'must not be blank' }],
+        },
+        status: 400,
+      },
+      message: 'Request failed',
+      config: { url: '/api/tasks' },
+    } as unknown as AxiosError<ApiErrorResponse>;
+
+    const error = transformError(axiosError);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).status).toBe(400);
+    expect((error as ApiError).message).toBe('Validation failed');
+    expect((error as ApiError).errorType).toBe('Bad Request');
+    expect((error as ApiError).path).toBe('/api/tasks');
+    expect((error as ApiError).fieldErrors).toHaveLength(1);
+  });
+
+  it('should use default values for missing fields in structured response', () => {
+    const axiosError = {
+      response: {
+        data: {
+          message: 'Something went wrong',
+        },
+        status: 500,
+      },
+      message: 'Request failed',
+      config: { url: '/api/tasks' },
+    } as unknown as AxiosError<ApiErrorResponse>;
+
+    const error = transformError(axiosError);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).status).toBe(500);
+    expect((error as ApiError).message).toBe('Something went wrong');
+    expect((error as ApiError).errorType).toBe('Internal Server Error');
+    expect((error as ApiError).path).toBe('/api/tasks');
+    expect((error as ApiError).timestamp).toBeDefined();
+  });
+
+  it('should handle non-standard error response (string data)', () => {
+    const axiosError = {
+      response: {
+        data: 'Internal Server Error',
+        status: 500,
+      },
+      message: 'Request failed with status code 500',
+      config: { url: '/api/tasks' },
+    } as unknown as AxiosError<ApiErrorResponse>;
+
+    const error = transformError(axiosError);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).status).toBe(500);
+    expect((error as ApiError).message).toBe('Request failed with status code 500');
+    expect((error as ApiError).errorType).toBe('Internal Server Error');
+  });
+
+  it('should handle error response without config URL', () => {
+    const axiosError = {
+      response: {
+        data: {
+          message: 'Not found',
+        },
+        status: 404,
+      },
+      message: 'Request failed',
+      config: undefined,
+    } as unknown as AxiosError<ApiErrorResponse>;
+
+    const error = transformError(axiosError);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).path).toBe('');
+  });
+
+  it('should use default message for non-standard error without message', () => {
+    const axiosError = {
+      response: {
+        data: null,
+        status: 502,
+      },
+      message: '',
+      config: { url: '/api/tasks' },
+    } as unknown as AxiosError<ApiErrorResponse>;
+
+    const error = transformError(axiosError);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).message).toBe('An unexpected error occurred');
   });
 });
