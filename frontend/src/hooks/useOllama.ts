@@ -365,9 +365,11 @@ export const clearModelsCache = (): void => {
  * Fetches models from the Ollama API with a preceding status check.
  * Extracted from the hook so the fetch logic can be reused (e.g. in effects
  * and refetch handlers) and tested in isolation without React hook concerns.
+ *
+ * @param forceRefresh - If true, bypasses the shared models cache
  * @internal
  */
-async function fetchOllamaWithStatus(): Promise<UseOllamaState> {
+async function fetchOllamaWithStatus(forceRefresh = false): Promise<UseOllamaState> {
   try {
     // First check if Ollama is available
     const statusResponse = await api.get<OllamaStatusResponse>('/ollama/status');
@@ -381,8 +383,24 @@ async function fetchOllamaWithStatus(): Promise<UseOllamaState> {
       };
     }
 
+    // Use shared cache if valid and not forcing refresh
+    if (!forceRefresh && isCacheValid(modelsCache)) {
+      return {
+        models: modelsCache!.data,
+        isLoading: false,
+        error: null,
+        isAvailable: true,
+      };
+    }
+
     // Fetch models if Ollama is available
     const modelsResponse = await api.get<ModelsResponse>('/ollama/models');
+
+    // Update shared cache
+    modelsCache = {
+      data: modelsResponse.models,
+      timestamp: Date.now(),
+    };
 
     return {
       models: modelsResponse.models,
@@ -438,7 +456,7 @@ export function useOllama(): UseOllamaReturn {
   const refetch = useCallback(async (): Promise<void> => {
     const currentRequestId = ++requestIdRef.current;
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
-    const result = await fetchOllamaWithStatus();
+    const result = await fetchOllamaWithStatus(true); // Force refresh on manual refetch
     // Only update state if this is still the latest request and component is mounted
     if (isMounted.current && currentRequestId === requestIdRef.current) {
       setState(result);

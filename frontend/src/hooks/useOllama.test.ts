@@ -504,6 +504,7 @@ const mockApi = api as unknown as { get: Mock };
 describe('useOllama', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    clearModelsCache(); // Clear shared cache between tests
   });
 
   afterEach(() => {
@@ -829,6 +830,88 @@ describe('useOllama', () => {
       expect(result.current.models).toEqual([]);
       expect(result.current.isAvailable).toBe(true);
       expect(result.current.error).toBeNull();
+    });
+  });
+
+  describe('caching', () => {
+    it('uses shared cache from useOllamaModels', async () => {
+      mockApi.get.mockImplementation((url: string) => {
+        if (url === '/ollama/status') {
+          return Promise.resolve({
+            available: true,
+            baseUrl: 'http://localhost:11434',
+            modelCount: 2,
+            message: 'Ollama is running',
+          });
+        }
+        if (url === '/ollama/models') {
+          return Promise.resolve({ models: ['llama3:8b', 'codellama:7b'] });
+        }
+        return Promise.reject(new Error('Unknown endpoint'));
+      });
+
+      // First call populates cache
+      const { result: result1 } = renderHook(() => useOllama());
+
+      await waitFor(() => {
+        expect(result1.current.isLoading).toBe(false);
+      });
+
+      expect(result1.current.models).toEqual(['llama3:8b', 'codellama:7b']);
+      // Called twice: status + models
+      expect(mockApi.get).toHaveBeenCalledTimes(2);
+
+      // Second hook should use cached models (only calls status)
+      const { result: result2 } = renderHook(() => useOllama());
+
+      await waitFor(() => {
+        expect(result2.current.isLoading).toBe(false);
+      });
+
+      expect(result2.current.models).toEqual(['llama3:8b', 'codellama:7b']);
+      // Only status was called again, models came from cache
+      expect(mockApi.get).toHaveBeenCalledTimes(3); // 2 from first + 1 status from second
+    });
+
+    it('bypasses cache on refetch', async () => {
+      let modelCallCount = 0;
+      mockApi.get.mockImplementation((url: string) => {
+        if (url === '/ollama/status') {
+          return Promise.resolve({
+            available: true,
+            baseUrl: 'http://localhost:11434',
+            modelCount: 1,
+            message: 'Ollama is running',
+          });
+        }
+        if (url === '/ollama/models') {
+          modelCallCount++;
+          return Promise.resolve({
+            models: modelCallCount === 1 ? ['llama3:8b'] : ['llama3:8b', 'mistral:7b'],
+          });
+        }
+        return Promise.reject(new Error('Unknown endpoint'));
+      });
+
+      const { result } = renderHook(() => useOllama());
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.models).toEqual(['llama3:8b']);
+      expect(modelCallCount).toBe(1);
+
+      // Refetch should bypass cache and fetch fresh data
+      await act(async () => {
+        await result.current.refetch();
+      });
+
+      await waitFor(() => {
+        expect(result.current.models).toEqual(['llama3:8b', 'mistral:7b']);
+      });
+
+      expect(modelCallCount).toBe(2);
     });
   });
 });
