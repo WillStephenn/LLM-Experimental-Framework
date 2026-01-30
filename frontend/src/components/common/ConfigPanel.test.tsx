@@ -232,6 +232,24 @@ describe('ConfigPanel', () => {
       expect(mockSetTopK).toHaveBeenCalledWith(60);
     });
 
+    it('does not call setTopK for non-numeric input', () => {
+      render(<ConfigPanel />);
+
+      const input = screen.getByTestId('config-panel-top-k-input');
+      fireEvent.change(input, { target: { value: 'abc' } });
+
+      expect(mockSetTopK).not.toHaveBeenCalled();
+    });
+
+    it('passes values to store which handles clamping', () => {
+      render(<ConfigPanel />);
+
+      const input = screen.getByTestId('config-panel-top-k-input');
+      // Store handles clamping, so we just verify the value is passed
+      fireEvent.change(input, { target: { value: '150' } });
+      expect(mockSetTopK).toHaveBeenCalledWith(150);
+    });
+
     it('displays helper text for top K', () => {
       render(<ConfigPanel />);
 
@@ -255,6 +273,24 @@ describe('ConfigPanel', () => {
       fireEvent.change(input, { target: { value: '8192' } });
 
       expect(mockSetContextWindow).toHaveBeenCalledWith(8192);
+    });
+
+    it('does not call setContextWindow for non-numeric input', () => {
+      render(<ConfigPanel />);
+
+      const input = screen.getByTestId('config-panel-context-window-input');
+      fireEvent.change(input, { target: { value: 'abc' } });
+
+      expect(mockSetContextWindow).not.toHaveBeenCalled();
+    });
+
+    it('passes values to store which handles clamping', () => {
+      render(<ConfigPanel />);
+
+      const input = screen.getByTestId('config-panel-context-window-input');
+      // Store handles clamping, so we just verify the value is passed
+      fireEvent.change(input, { target: { value: '200000' } });
+      expect(mockSetContextWindow).toHaveBeenCalledWith(200000);
     });
 
     it('displays helper text for context window', () => {
@@ -281,6 +317,16 @@ describe('ConfigPanel', () => {
       fireEvent.change(input, { target: { value: '1000' } });
 
       expect(mockSetMaxTokens).toHaveBeenCalledWith(1000);
+    });
+
+    it('does not call setMaxTokens for non-numeric input', () => {
+      render(<ConfigPanel />);
+
+      const input = screen.getByTestId('config-panel-max-tokens-input');
+      fireEvent.change(input, { target: { value: 'abc' } });
+
+      // Should not call setMaxTokens for non-numeric input (NaN check)
+      expect(mockSetMaxTokens).not.toHaveBeenCalled();
     });
 
     it('calls setMaxTokens with null when input is cleared', () => {

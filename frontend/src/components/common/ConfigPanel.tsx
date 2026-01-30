@@ -267,10 +267,7 @@ export function ConfigPanel({
                 <Slider.Track className="bg-gray-200 relative grow rounded-full h-1.5">
                   <Slider.Range className="absolute bg-brand-green rounded-full h-full" />
                 </Slider.Track>
-                <Slider.Thumb
-                  className="block w-4 h-4 bg-white shadow border border-gray-300 rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 transition-colors"
-                  aria-label="Temperature"
-                />
+                <Slider.Thumb className="block w-4 h-4 bg-white shadow border border-gray-300 rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 transition-colors" />
               </Slider.Root>
               <p className="text-xs text-gray-400">
                 Controls randomness. Lower is more focused, higher is more creative.
@@ -301,10 +298,7 @@ export function ConfigPanel({
                 <Slider.Track className="bg-gray-200 relative grow rounded-full h-1.5">
                   <Slider.Range className="absolute bg-brand-green rounded-full h-full" />
                 </Slider.Track>
-                <Slider.Thumb
-                  className="block w-4 h-4 bg-white shadow border border-gray-300 rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 transition-colors"
-                  aria-label="Top P"
-                />
+                <Slider.Thumb className="block w-4 h-4 bg-white shadow border border-gray-300 rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 transition-colors" />
               </Slider.Root>
               <p className="text-xs text-gray-400">Nucleus sampling probability threshold.</p>
             </div>
