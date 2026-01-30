@@ -192,7 +192,7 @@ export function ModelSelector({
           <button
             type="button"
             onClick={handleRetry}
-            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors duration-150"
+            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-1"
             aria-label="Retry loading models"
             data-testid={`${testId}-retry`}
           >

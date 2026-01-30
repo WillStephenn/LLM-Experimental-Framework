@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ModelSelector } from './ModelSelector';
 import { useOllama } from '@/hooks/useOllama';
-import { useConfigStore } from '@/store/configStore';
+import { useConfigStore, DEFAULT_CONFIG_STATE, DEFAULT_HYPERPARAMETERS } from '@/store/configStore';
+import type { ConfigActions, ConfigState } from '@/store/configStore';
 
 // Mock the useOllama hook
 vi.mock('@/hooks/useOllama', () => ({
@@ -11,13 +12,18 @@ vi.mock('@/hooks/useOllama', () => ({
 
 const mockUseOllama = useOllama as ReturnType<typeof vi.fn>;
 
+// Store original actions for restoration
+let originalSetModel: ConfigActions['setModel'];
+
 describe('ModelSelector', () => {
   const mockRefetch = vi.fn();
   const mockSetModel = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset the config store
+    // Save original setModel before overwriting
+    originalSetModel = useConfigStore.getState().setModel;
+    // Reset the config store state
     useConfigStore.setState({ model: null });
     // Override setModel to use mock
     useConfigStore.setState({
@@ -27,6 +33,12 @@ describe('ModelSelector', () => {
 
   afterEach(() => {
     vi.resetAllMocks();
+    // Restore original store state and actions
+    useConfigStore.setState({
+      ...DEFAULT_CONFIG_STATE,
+      hyperparameters: { ...DEFAULT_HYPERPARAMETERS },
+      setModel: originalSetModel,
+    } as Partial<ConfigState & ConfigActions>);
   });
 
   describe('loading state', () => {
