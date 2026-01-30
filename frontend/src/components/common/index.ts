@@ -10,3 +10,6 @@ export type { ModelSelectorProps } from './ModelSelector';
 
 export { MetricsDisplay } from './MetricsDisplay';
 export type { MetricsDisplayProps, GenerationMetrics, MetricsDisplayMode } from './MetricsDisplay';
+
+export { ConfigPanel } from './ConfigPanel';
+export type { ConfigPanelProps } from './ConfigPanel';
