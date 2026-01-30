@@ -1,6 +1,14 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
+
+// Mock ResizeObserver for Radix UI components
+class MockResizeObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+window.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
 
 // Mock scrollIntoView for Radix UI components
 Element.prototype.scrollIntoView = function (): void {
