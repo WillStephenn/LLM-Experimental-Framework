@@ -80,4 +80,7 @@ public class GenerationRequest {
 
     /** Whether to stream the response. Defaults to false. */
     @Builder.Default private Boolean stream = false;
+
+    /** Whether to request a structured JSON response. Defaults to false. */
+    @Builder.Default private Boolean jsonMode = false;
 }

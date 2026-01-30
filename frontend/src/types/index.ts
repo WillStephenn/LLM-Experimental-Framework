@@ -455,6 +455,8 @@ export interface GenerationRequest {
   maxTokens?: number;
   /** Whether to stream the response. */
   stream?: boolean;
+  /** Whether to request a structured JSON response. */
+  jsonMode?: boolean;
 }
 
 /**

@@ -435,7 +435,8 @@ Used for creating and updating task templates.
   "topK": 40,
   "contextWindow": 4096,
   "maxTokens": null,
-  "stream": false
+  "stream": false,
+  "jsonMode": false
 }
 ```
 
@@ -452,6 +453,7 @@ Used for creating and updating task templates.
 | `contextWindow` | Integer | No | Min 512, max 128000 |
 | `maxTokens` | Integer | No | Min 1 if provided |
 | `stream` | Boolean | No | Default `false` |
+| `jsonMode` | Boolean | No | Default `false` |
 
 #### GenerationResponse (Server → Client)
 

@@ -24,6 +24,8 @@ import io.github.ollama4j.OllamaAPI;
 import io.github.ollama4j.exceptions.OllamaBaseException;
 import io.github.ollama4j.models.embeddings.OllamaEmbedRequestModel;
 import io.github.ollama4j.models.embeddings.OllamaEmbedResponseModel;
+import io.github.ollama4j.models.generate.OllamaGenerateRequest;
+import io.github.ollama4j.models.request.OllamaGenerateEndpointCaller;
 import io.github.ollama4j.models.response.Model;
 import io.github.ollama4j.models.response.OllamaResult;
 import io.github.ollama4j.utils.Options;
@@ -65,6 +67,7 @@ public class OllamaClientImpl implements OllamaClient {
 
     private final OllamaAPI ollamaApi;
     private final OllamaConfig config;
+    private final OllamaGenerateEndpointCaller generateCaller;
 
     /**
      * Constructs a new OllamaClientImpl with the specified configuration.
@@ -75,6 +78,7 @@ public class OllamaClientImpl implements OllamaClient {
     public OllamaClientImpl(OllamaConfig config) {
         this.config = config;
         this.ollamaApi = createOllamaApi(config);
+        this.generateCaller = createGenerateCaller(config);
         LOGGER.info(
                 "OllamaClient initialised with base URL: {}, timeout: {}s",
                 config.getBaseUrl(),
@@ -90,6 +94,16 @@ public class OllamaClientImpl implements OllamaClient {
     OllamaClientImpl(OllamaConfig config, OllamaAPI ollamaApi) {
         this.config = config;
         this.ollamaApi = ollamaApi;
+        this.generateCaller = createGenerateCaller(config);
+    }
+
+    OllamaClientImpl(
+            OllamaConfig config,
+            OllamaAPI ollamaApi,
+            OllamaGenerateEndpointCaller generateCaller) {
+        this.config = config;
+        this.ollamaApi = ollamaApi;
+        this.generateCaller = generateCaller;
     }
 
     /**
@@ -102,6 +116,20 @@ public class OllamaClientImpl implements OllamaClient {
         OllamaAPI api = new OllamaAPI(config.getBaseUrl());
         api.setRequestTimeoutSeconds(config.getTimeoutSeconds());
         return api;
+    }
+
+    /**
+     * Creates the endpoint caller used for JSON formatted generation responses.
+     *
+     * @param config the configuration settings
+     * @return the configured generate endpoint caller
+     */
+    private OllamaGenerateEndpointCaller createGenerateCaller(OllamaConfig config) {
+        return new OllamaGenerateEndpointCaller(
+                config.getBaseUrl(),
+                null,
+                config.getTimeoutSeconds(),
+                false);
     }
 
     @Override
@@ -142,14 +170,15 @@ public class OllamaClientImpl implements OllamaClient {
                 () -> {
                     long startTime = System.currentTimeMillis();
 
-                    Options options = buildOptions(request);
                     OllamaResult result =
-                            ollamaApi.generate(
-                                    request.getModel(),
-                                    buildPromptWithSystem(request),
-                                    false,
-                                    options,
-                                    null);
+                            request.getJsonMode() != null && request.getJsonMode()
+                                    ? generateJsonResponse(request)
+                                    : ollamaApi.generate(
+                                            request.getModel(),
+                                            buildPromptWithSystem(request),
+                                            false,
+                                            buildOptions(request),
+                                            null);
 
                     long endTime = System.currentTimeMillis();
                     long duration = endTime - startTime;
@@ -165,6 +194,19 @@ public class OllamaClientImpl implements OllamaClient {
                     return response;
                 },
                 "generate");
+    }
+
+    private OllamaResult generateJsonResponse(GenerationRequest request) throws Exception {
+        OllamaGenerateRequest generateRequest =
+                new OllamaGenerateRequest(request.getModel(), buildPromptWithSystem(request));
+        generateRequest.setOptions(buildOptions(request).getOptionsMap());
+        generateRequest.setReturnFormatJson(true);
+        return callGenerateEndpoint(generateRequest);
+    }
+
+    private OllamaResult callGenerateEndpoint(OllamaGenerateRequest generateRequest)
+            throws Exception {
+        return generateCaller.callSync(generateRequest);
     }
 
     @Override

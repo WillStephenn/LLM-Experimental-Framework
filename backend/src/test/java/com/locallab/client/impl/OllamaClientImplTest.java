@@ -29,8 +29,10 @@ import io.github.ollama4j.OllamaAPI;
 import io.github.ollama4j.exceptions.OllamaBaseException;
 import io.github.ollama4j.models.embeddings.OllamaEmbedRequestModel;
 import io.github.ollama4j.models.embeddings.OllamaEmbedResponseModel;
+import io.github.ollama4j.models.generate.OllamaGenerateRequest;
 import io.github.ollama4j.models.response.Model;
 import io.github.ollama4j.models.response.OllamaResult;
+import io.github.ollama4j.models.request.OllamaGenerateEndpointCaller;
 import io.github.ollama4j.utils.Options;
 
 /**
@@ -45,6 +47,7 @@ import io.github.ollama4j.utils.Options;
 class OllamaClientImplTest {
 
     @Mock private OllamaAPI ollamaApi;
+    @Mock private OllamaGenerateEndpointCaller generateCaller;
 
     private OllamaConfig config;
     private OllamaClientImpl ollamaClient;
@@ -52,7 +55,7 @@ class OllamaClientImplTest {
     @BeforeEach
     void setUp() {
         config = createDefaultConfig();
-        ollamaClient = new OllamaClientImpl(config, ollamaApi);
+        ollamaClient = new OllamaClientImpl(config, ollamaApi, generateCaller);
     }
 
     private OllamaConfig createDefaultConfig() {
@@ -335,6 +338,30 @@ class OllamaClientImplTest {
                                                     && options.getOptionsMap()
                                                             .containsKey("temperature")),
                             isNull());
+        }
+
+        @Test
+        @DisplayName("should request JSON response when jsonMode is enabled")
+        void shouldRequestJsonResponseWhenEnabled() throws Exception {
+            // Arrange
+            GenerationRequest request =
+                    GenerationRequest.builder()
+                            .model("llama3:8b")
+                            .prompt("Return JSON")
+                            .jsonMode(true)
+                            .build();
+
+            OllamaResult result = createMockOllamaResult("{\"status\":\"ok\"}");
+            when(generateCaller.callSync(any(OllamaGenerateRequest.class))).thenReturn(result);
+
+            // Act
+            GenerationResponse response = ollamaClient.generate(request);
+
+            // Assert
+            assertEquals("{\"status\":\"ok\"}", response.getResponse());
+            verify(generateCaller)
+                    .callSync(argThat(generateRequest -> Boolean.TRUE.equals(
+                            generateRequest.getReturnFormatJson())));
         }
     }
 
