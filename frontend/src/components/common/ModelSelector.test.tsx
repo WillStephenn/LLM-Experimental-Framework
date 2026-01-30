@@ -10,7 +10,7 @@ vi.mock('@/hooks/useOllama', () => ({
   useOllama: vi.fn(),
 }));
 
-const mockUseOllama = useOllama as ReturnType<typeof vi.fn>;
+const mockUseOllama = vi.mocked(useOllama);
 
 // Store original actions for restoration
 let originalSetModel: ConfigActions['setModel'];
