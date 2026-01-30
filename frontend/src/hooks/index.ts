@@ -31,5 +31,11 @@ export type {
   UseExperimentControlReturn,
 } from './useExperimentControl';
 
+// Document and embedding model hooks
+export { useDocuments } from './useDocuments';
+export type { UseDocumentsReturn } from './useDocuments';
+export { useEmbeddingModels } from './useEmbeddingModels';
+export type { UseEmbeddingModelsReturn } from './useEmbeddingModels';
+
 // Re-export ApiError for convenience
 export { ApiError } from '@/api/client';
