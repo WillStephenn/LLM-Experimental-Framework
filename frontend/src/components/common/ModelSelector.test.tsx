@@ -7,7 +7,13 @@ import type { ConfigActions, ConfigState } from '@/store/configStore';
 
 // Mock the useOllama hook
 vi.mock('@/hooks/useOllama', () => ({
-  useOllama: vi.fn(),
+  useOllama: vi.fn(() => ({
+    models: [],
+    isLoading: false,
+    error: null,
+    isAvailable: true,
+    refetch: vi.fn(),
+  })),
 }));
 
 const mockUseOllama = vi.mocked(useOllama);

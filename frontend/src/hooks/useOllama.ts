@@ -183,7 +183,7 @@ export const useOllamaModels = (): UseOllamaModelsState => {
     isMountedRef.current = true;
     void fetchModels();
 
-    return () => {
+    return (): void => {
       isMountedRef.current = false;
     };
   }, [fetchModels]);
@@ -252,7 +252,7 @@ export const useOllamaStatus = (): UseOllamaStatusState => {
     isMountedRef.current = true;
     void fetchStatus();
 
-    return () => {
+    return (): void => {
       isMountedRef.current = false;
     };
   }, [fetchStatus]);
@@ -306,7 +306,7 @@ export const useGenerate = (): UseGenerateState => {
   useEffect(() => {
     isMountedRef.current = true;
 
-    return () => {
+    return (): void => {
       isMountedRef.current = false;
     };
   }, []);
