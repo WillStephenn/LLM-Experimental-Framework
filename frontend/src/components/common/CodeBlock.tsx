@@ -4,7 +4,7 @@
  * Displays code with syntax highlighting, optional line numbers, and copy-to-clipboard functionality.
  * Follows the Academic Modern design system.
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Highlight, themes } from 'prism-react-renderer';
 
 /**
@@ -124,29 +124,54 @@ export function CodeBlock({
   'data-testid': testId = 'code-block',
 }: CodeBlockProps): React.JSX.Element {
   const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return (): void => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleCopy = useCallback((): void => {
     const performCopy = async (): Promise<void> => {
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
       try {
         await navigator.clipboard.writeText(code);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        timeoutRef.current = setTimeout(() => setCopied(false), 2000);
       } catch {
         // Fallback for browsers that don't support clipboard API
-        const textArea = document.createElement('textarea');
-        textArea.value = code;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-9999px';
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        try {
+          const textArea = document.createElement('textarea');
+          textArea.value = code;
+          textArea.style.position = 'fixed';
+          textArea.style.left = '-9999px';
+          document.body.appendChild(textArea);
+          textArea.select();
+          const success = document.execCommand('copy');
+          document.body.removeChild(textArea);
+
+          if (success) {
+            setCopied(true);
+            timeoutRef.current = setTimeout(() => setCopied(false), 2000);
+          }
+        } catch {
+          // Silently fail if both clipboard API and execCommand fail
+        }
       }
     };
     void performCopy();
   }, [code]);
+
+  // Memoize trimmed code to avoid redundant string operations
+  const trimmedCode = useMemo(() => code.trim(), [code]);
 
   const prismLanguage = mapLanguageToPrism(language);
   const displayLanguage = languageDisplayNames[language];
@@ -184,7 +209,7 @@ export function CodeBlock({
 
       {/* Code content with syntax highlighting */}
       <div className="overflow-x-auto">
-        <Highlight theme={themes.github} code={code.trim()} language={prismLanguage}>
+        <Highlight theme={themes.github} code={trimmedCode} language={prismLanguage}>
           {({ className, style, tokens, getLineProps, getTokenProps }) => (
             <pre
               className={`${className} p-4 m-0 bg-transparent`}

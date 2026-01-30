@@ -189,4 +189,101 @@ line 5`;
       expect(screen.getByTestId('code-block-pre')).toBeInTheDocument();
     });
   });
+
+  describe('edge cases', () => {
+    it('handles empty string code', () => {
+      render(<CodeBlock code="" language="typescript" />);
+      expect(screen.getByTestId('code-block')).toBeInTheDocument();
+      expect(screen.getByTestId('code-block-pre')).toBeInTheDocument();
+    });
+
+    it('handles code with only whitespace', () => {
+      render(<CodeBlock code="   \n\n   " language="typescript" />);
+      expect(screen.getByTestId('code-block')).toBeInTheDocument();
+      expect(screen.getByTestId('code-block-pre')).toBeInTheDocument();
+    });
+
+    it('handles code with special HTML characters', () => {
+      const codeWithSpecialChars = '<div class="test">&amp;</div>';
+      render(<CodeBlock code={codeWithSpecialChars} language="html" />);
+      expect(screen.getByTestId('code-block-pre')).toBeInTheDocument();
+    });
+
+    it('handles very long single-line code', () => {
+      const longCode = 'const x = ' + '"a"'.repeat(1000);
+      render(<CodeBlock code={longCode} language="typescript" />);
+      expect(screen.getByTestId('code-block')).toBeInTheDocument();
+    });
+  });
+
+  describe('clipboard fallback', () => {
+    it('uses fallback when clipboard API fails', async () => {
+      // Mock clipboard API to reject
+      const mockFailingWriteText = vi.fn().mockRejectedValue(new Error('Clipboard not available'));
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: mockFailingWriteText },
+        writable: true,
+        configurable: true,
+      });
+
+      // Mock execCommand
+      const mockExecCommand = vi.fn().mockReturnValue(true);
+      Object.defineProperty(document, 'execCommand', {
+        value: mockExecCommand,
+        writable: true,
+        configurable: true,
+      });
+
+      render(<CodeBlock code="test code" />);
+      const copyButton = screen.getByTestId('code-block-copy-button');
+
+      act(() => {
+        fireEvent.click(copyButton);
+      });
+
+      await waitFor(() => {
+        expect(mockExecCommand).toHaveBeenCalledWith('copy');
+      });
+
+      await waitFor(() => {
+        expect(copyButton).toHaveTextContent('Copied');
+      });
+    });
+
+    it('does not show copied state when fallback fails', async () => {
+      // Mock clipboard API to reject
+      const mockFailingWriteText = vi.fn().mockRejectedValue(new Error('Clipboard not available'));
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: mockFailingWriteText },
+        writable: true,
+        configurable: true,
+      });
+
+      // Mock execCommand to return false (failure)
+      const mockExecCommand = vi.fn().mockReturnValue(false);
+      Object.defineProperty(document, 'execCommand', {
+        value: mockExecCommand,
+        writable: true,
+        configurable: true,
+      });
+
+      render(<CodeBlock code="test code" />);
+      const copyButton = screen.getByTestId('code-block-copy-button');
+
+      act(() => {
+        fireEvent.click(copyButton);
+      });
+
+      // Wait for the async operation to complete
+      await waitFor(
+        () => {
+          expect(mockExecCommand).toHaveBeenCalledWith('copy');
+        },
+        { timeout: 1000 }
+      );
+
+      // Button should still show "Copy" since fallback failed
+      expect(copyButton).toHaveTextContent('Copy');
+    });
+  });
 });
