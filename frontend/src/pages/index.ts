@@ -11,3 +11,4 @@ export { ExperimentBuilderPage } from './ExperimentBuilderPage';
 export { ExperimentRunnerPage } from './ExperimentRunnerPage';
 export { ResultsDashboardPage } from './ResultsDashboardPage';
 export { EmbeddingAnalyserPage } from './EmbeddingAnalyserPage';
+export * from './ComponentGalleryPage';

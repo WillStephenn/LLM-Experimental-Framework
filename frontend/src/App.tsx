@@ -14,6 +14,7 @@ import {
   ExperimentRunnerPage,
   ResultsDashboardPage,
   EmbeddingAnalyserPage,
+  ComponentGalleryPage,
 } from '@/pages';
 
 /**
@@ -36,6 +37,7 @@ function App(): React.JSX.Element {
           <Route path="experiments/:id/run" element={<ExperimentRunnerPage />} />
           <Route path="results" element={<ResultsDashboardPage />} />
           <Route path="embeddings" element={<EmbeddingAnalyserPage />} />
+          <Route path="gallery" element={<ComponentGalleryPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
