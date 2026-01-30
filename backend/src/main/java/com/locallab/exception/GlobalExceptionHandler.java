@@ -188,6 +188,35 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles missing required request parameters.
+     *
+     * @param ex the MissingServletRequestParameterException thrown
+     * @param request the HTTP request that triggered the exception
+     * @return ResponseEntity containing the error response
+     */
+    @ExceptionHandler(org.springframework.web.bind.MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(
+            org.springframework.web.bind.MissingServletRequestParameterException ex,
+            HttpServletRequest request) {
+
+        String message =
+                String.format(
+                        "Required request parameter '%s' of type %s is missing",
+                        ex.getParameterName(), ex.getParameterType());
+
+        LOGGER.warn("Missing parameter: {} - Path: {}", message, request.getRequestURI());
+
+        ErrorResponse errorResponse =
+                new ErrorResponse(
+                        HttpStatus.BAD_REQUEST.value(),
+                        HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                        message,
+                        request.getRequestURI());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Handles type mismatch errors (e.g., invalid path variable types).
      *
      * @param ex the MethodArgumentTypeMismatchException thrown
