@@ -5,3 +5,5 @@
  */
 export { CodeBlock } from './CodeBlock';
 export type { CodeBlockProps, SupportedLanguage } from './CodeBlock';
+export { ModelSelector } from './ModelSelector';
+export type { ModelSelectorProps } from './ModelSelector';
