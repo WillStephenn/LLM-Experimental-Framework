@@ -64,6 +64,45 @@ Reference these files for implementation details:
 
 Only read-only git interactions are permitted. Do not perform any git write operations (commit, push, branch, merge, etc.) in this project. No updating, modifying or closing issues.
 
+---
+
+## Coding Agent Task Execution Protocol
+
+**When working on any frontend issue (especially 7.* sub-issues), follow this protocol:**
+
+### Pre-Implementation Checklist
+1. **Read `docs/Specification.md`** - Understand the page/component requirements
+2. **Read `docs/API-Contract.md`** - Know the exact DTOs and endpoints you'll consume
+3. **Read `docs/ISSUES.md`** - Check dependencies and acceptance criteria for your specific sub-issue
+4. **Review existing components** - Check `components/common/` for reusable primitives before creating new ones
+5. **Verify API endpoints exist** - If backend endpoints don't exist yet, create mock data
+
+### Implementation Checklist
+1. **Create TypeScript types first** - Define interfaces in `types/` before writing components
+2. **Follow component structure exactly** - Use the patterns in the Frontend Style Guide section
+3. **Use existing common components** - `Button`, `Card`, `Input`, `Select`, `Table`, `Modal`, etc.
+4. **Add loading and error states** - Every data-fetching component needs both
+5. **Write tests alongside code** - Co-locate test files with components
+6. **Run `npm run lint` and `npm run test`** before considering the task complete
+
+### Quality Gates
+- **No TypeScript errors**: `npm run type-check` must pass
+- **No lint errors**: `npm run lint` must pass
+- **All tests pass**: `npm run test` must pass
+- **Builds successfully**: `npm run build` must pass
+- **Coverage met**: 80% line coverage for new code
+
+### File Naming Conventions
+| Type | Pattern | Example |
+|------|---------|--------|
+| Component | PascalCase.tsx | `ExperimentCard.tsx` |
+| Test | PascalCase.test.tsx | `ExperimentCard.test.tsx` |
+| Hook | camelCase.ts | `useExperiment.ts` |
+| Type | camelCase.ts | `experiment.ts` |
+| Utility | camelCase.ts | `formatters.ts` |
+| Page | PascalCase.tsx | `ExperimentsPage.tsx` |
+| Store | camelCase.ts | `experimentStore.ts` |
+
 ## Sub-Issue Push Workflow
 
 When tasked with pushing sub-issues to the repo, always:
@@ -188,8 +227,16 @@ throw new ResponseStatusException(
 
 **Coverage Requirements:**
 - Backend: 95% line coverage target
-- Frontend: 80% line coverage target
+- Frontend: 80% line coverage target (enforced by Vitest)
 - Coverage targets apply only to classes with custom logic (not Lombok-generated boilerplate)
+- **No new code merged without meeting coverage thresholds**
+
+**Frontend Testing Priorities:**
+1. **Hooks with business logic** - useExperiment, useWebSocket, etc.
+2. **Components with interactivity** - forms, buttons, modals
+3. **Data transformation utilities** - formatters, validators
+4. **Page components** - integration tests for user flows
+5. **Pure presentational components** - lowest priority, test if time permits
 
 **Jacoco-Driven Testing Approach:**
 - **Let Jacoco guide test creation** - only write tests for classes that appear in Jacoco coverage reports
@@ -218,24 +265,68 @@ throw new ResponseStatusException(
 ### Directory Structure
 ```
 src/
-├── api/           # Axios client + endpoint modules
-├── components/    # common/, experiments/, results/
-├── pages/         # Route-level components
-├── hooks/         # useOllama, useExperiment, useWebSocket
-├── store/         # Zustand stores (configStore)
-└── types/         # TypeScript interfaces matching API contract
+├── api/             # Axios client + endpoint modules
+│   ├── client.ts    # Axios instance with interceptors
+│   ├── experiments.ts
+│   ├── taskTemplates.ts
+│   ├── documents.ts
+│   └── ollama.ts
+├── components/      # Reusable UI components
+│   ├── common/      # Shared primitives (Button, Card, Input, Modal, etc.)
+│   ├── layout/      # Layout components (Sidebar, Header, PageContainer)
+│   ├── experiments/ # Experiment-specific components
+│   ├── results/     # Results & analytics components
+│   └── documents/   # Document management components
+├── pages/           # Route-level page components (one per route)
+├── hooks/           # Custom React hooks
+│   ├── useOllama.ts
+│   ├── useExperiment.ts
+│   ├── useWebSocket.ts
+│   └── useApi.ts    # Generic API hook with loading/error states
+├── store/           # Zustand stores
+│   ├── configStore.ts
+│   └── experimentStore.ts
+├── types/           # TypeScript interfaces (mirror API contract DTOs)
+│   ├── api.ts       # Request/Response types
+│   ├── models.ts    # Domain model types
+│   └── common.ts    # Shared utility types
+└── utils/           # Pure utility functions
+    ├── formatters.ts
+    ├── validators.ts
+    └── constants.ts
 ```
 
 ### State Management
 - **Zustand** for global config (model, temperature, topP, topK, etc.)
-- React Query or custom hooks for server state
-- WebSocket via STOMP for experiment progress (`/topic/experiments/{id}/progress`)
+- **TanStack Query (React Query)** for server state with caching
+- **WebSocket via STOMP** for experiment progress (`/topic/experiments/{id}/progress`)
+- Local component state for UI-only concerns (form inputs, toggles, modals)
 
 ### UI Components
-- **Radix UI** for accessible primitives
-- **TailwindCSS** for styling (utility-first)
-- **Recharts** for analytics visualisation
+- **Radix UI** for accessible primitives (Dialog, Select, Tabs, etc.)
+- **TailwindCSS** for styling (utility-first, no custom CSS unless absolutely necessary)
+- **Recharts** for analytics visualisation (charts, graphs)
 - **ReactFlow** for pipeline visualisation (static layout, future drag-drop)
+
+---
+
+## MANDATORY: Frontend Style Guide
+
+**Before writing ANY frontend code, you MUST read `docs/Frontend-Style-Guide.md`.**
+
+This style guide is LAW. All frontend components MUST adhere to these standards without exception. The guide contains:
+- Design tokens and Tailwind configuration
+- Component structure standards
+- Tailwind class ordering rules
+- Common component patterns (Button, Card, StatCard, etc.)
+- Spacing and layout rules
+- Typography scale
+- Responsive design rules
+- Accessibility requirements
+- DRY/KISS principles with examples
+- Extensibility patterns
+
+**Do not proceed with frontend implementation until you have read and understood the style guide.**
 
 ## Key Implementation Patterns
 
@@ -255,6 +346,142 @@ Use `{{variable}}` syntax for placeholders in `TaskTemplate.promptTemplate`. Ext
 3. Store in Chroma collection (`doc-{id}-{embeddingModel}`)
 4. Query: embed query → vector search → retrieve top-K chunks → inject into prompt
 
+### Frontend Page Patterns
+
+**Page component structure (all pages MUST follow):**
+```tsx
+// pages/ExperimentsPage.tsx
+import { PageContainer } from '@/components/layout/PageContainer';
+import { PageHeader } from '@/components/layout/PageHeader';
+
+export const ExperimentsPage = () => {
+  // 1. Route params & navigation
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  // 2. Data fetching
+  const { data, isLoading, error } = useExperiments();
+
+  // 3. Local state
+  const [filter, setFilter] = useState('');
+
+  // 4. Derived state
+  const filteredData = useMemo(() => 
+    data?.filter(e => e.name.includes(filter)), 
+    [data, filter]
+  );
+
+  // 5. Error/Loading states
+  if (error) return <ErrorState error={error} />;
+  if (isLoading) return <LoadingState />;
+
+  // 6. Render
+  return (
+    <PageContainer>
+      <PageHeader
+        title="Experiments"
+        action={<Button onClick={() => navigate('/experiments/new')}>New Experiment</Button>}
+      />
+      <ExperimentsList experiments={filteredData} />
+    </PageContainer>
+  );
+};
+```
+
+**API hook pattern:**
+```tsx
+// hooks/useExperiments.ts
+export const useExperiments = () => {
+  return useQuery({
+    queryKey: ['experiments'],
+    queryFn: () => api.experiments.getAll(),
+    staleTime: 30_000, // 30 seconds
+  });
+};
+
+export const useExperiment = (id: string) => {
+  return useQuery({
+    queryKey: ['experiments', id],
+    queryFn: () => api.experiments.getById(id),
+    enabled: !!id,
+  });
+};
+
+export const useCreateExperiment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.experiments.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experiments'] });
+    },
+  });
+};
+```
+
+**Form pattern (React Hook Form):**
+```tsx
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const schema = z.object({
+  name: z.string().min(1, 'Name is required').max(100),
+  description: z.string().max(500).optional(),
+});
+
+type FormData = z.infer<typeof schema>;
+
+export const ExperimentForm = ({ onSubmit }: Props) => {
+  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+    resolver: zodResolver(schema),
+  });
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <FormField
+        label="Name"
+        error={errors.name?.message}
+        {...register('name')}
+      />
+    </form>
+  );
+};
+```
+
+### WebSocket Integration Pattern
+```tsx
+// hooks/useExperimentProgress.ts
+export const useExperimentProgress = (experimentId: string) => {
+  const [progress, setProgress] = useState<ExperimentProgress | null>(null);
+  const client = useRef<Client | null>(null);
+
+  useEffect(() => {
+    if (!experimentId) return;
+
+    client.current = new Client({
+      brokerURL: 'ws://localhost:8080/ws',
+      onConnect: () => {
+        client.current?.subscribe(
+          `/topic/experiments/${experimentId}/progress`,
+          (message) => {
+            const data = JSON.parse(message.body);
+            setProgress(data);
+          }
+        );
+      },
+    });
+
+    client.current.activate();
+
+    return () => {
+      client.current?.deactivate();
+    };
+  }, [experimentId]);
+
+  return progress;
+};
+```
+
 ## Commands
 
 ```bash
@@ -264,9 +491,14 @@ mvn clean verify                           # Build + test + coverage
 mvn checkstyle:check                       # Style validation
 
 # Frontend
-cd frontend && npm run dev                 # Start on :5173
+cd frontend && npm install                 # Install dependencies
+npm run dev                                # Start on :5173
 npm run build                              # Production build
-npm run lint && npm run test               # Quality checks
+npm run lint                               # ESLint check
+npm run lint:fix                           # ESLint auto-fix
+npm run test                               # Run Vitest tests
+npm run test:coverage                      # Run tests with coverage
+npm run type-check                         # TypeScript type checking
 
 # Infrastructure
 docker-compose up -d chroma                # Start Chroma on :8000
@@ -274,8 +506,26 @@ docker-compose up -d chroma                # Start Chroma on :8000
 
 ## Common Pitfalls
 
+### Backend
 - **Ollama must be running** before backend starts (check with `GET /api/ollama/status`)
 - **CORS**: Backend allows `localhost:5173` in dev profile
 - **H2 Console**: Access at `/h2-console` (JDBC URL: `jdbc:h2:file:./data/locallab`)
 - **Experiment updates** only allowed when status is `DRAFT`
 - **WebSocket** uses STOMP protocol - connect to `/ws`, subscribe to `/topic/experiments/{id}/progress`
+
+### Frontend
+- **TypeScript strict mode** is enabled - never use `any` type, always define proper interfaces
+- **Never inline styles** - always use Tailwind classes
+- **Never use `index` as React key** - use unique identifiers from data
+- **Always handle loading and error states** - every API call needs both
+- **Forms must have proper validation** - use Zod schemas with react-hook-form
+- **All text must support UK English** - use "colour", "behaviour", "initialise"
+- **Test IDs pattern**: `data-testid="component-name-element"` (e.g., `data-testid="experiment-card-title"`)
+- **Import paths**: Use `@/` alias for src directory imports
+
+### Testing Requirements (Frontend)
+- **Component tests**: Use React Testing Library, test behaviour not implementation
+- **API mocking**: Use MSW (Mock Service Worker) for API tests
+- **Coverage target**: 80% line coverage
+- **Test file location**: Co-located with component (e.g., `Button.tsx` + `Button.test.tsx`)
+- **Naming convention**: `describe('ComponentName')` → `it('should do something')`
