@@ -5,11 +5,11 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
 import { type AxiosError, type AxiosResponse } from 'axios';
+import { type ErrorResponse } from '@/types';
 import {
   api,
   apiClient,
   ApiError,
-  type ApiErrorResponse,
   isFormData,
   transformError,
   getDefaultErrorType,
@@ -17,7 +17,7 @@ import {
 
 describe('ApiError', () => {
   it('should create an ApiError with all properties', () => {
-    const errorResponse: ApiErrorResponse = {
+    const errorResponse: ErrorResponse = {
       timestamp: '2025-11-27T10:00:00Z',
       status: 400,
       error: 'Bad Request',
@@ -38,7 +38,7 @@ describe('ApiError', () => {
   });
 
   it('should create an ApiError without field errors', () => {
-    const errorResponse: ApiErrorResponse = {
+    const errorResponse: ErrorResponse = {
       timestamp: '2025-11-27T10:00:00Z',
       status: 404,
       error: 'Not Found',
@@ -53,7 +53,7 @@ describe('ApiError', () => {
   });
 
   it('should be an instance of Error', () => {
-    const errorResponse: ApiErrorResponse = {
+    const errorResponse: ErrorResponse = {
       timestamp: '2025-11-27T10:00:00Z',
       status: 500,
       error: 'Internal Server Error',
@@ -231,7 +231,7 @@ describe('transformError', () => {
       response: undefined,
       message: 'Network Error',
       config: { url: '/api/tasks' },
-    } as unknown as AxiosError<ApiErrorResponse>;
+    } as unknown as AxiosError<ErrorResponse>;
 
     const error = transformError(axiosError);
 
@@ -244,7 +244,7 @@ describe('transformError', () => {
       response: undefined,
       message: '',
       config: { url: '/api/tasks' },
-    } as unknown as AxiosError<ApiErrorResponse>;
+    } as unknown as AxiosError<ErrorResponse>;
 
     const error = transformError(axiosError);
 
@@ -267,7 +267,7 @@ describe('transformError', () => {
       },
       message: 'Request failed',
       config: { url: '/api/tasks' },
-    } as unknown as AxiosError<ApiErrorResponse>;
+    } as unknown as AxiosError<ErrorResponse>;
 
     const error = transformError(axiosError);
 
@@ -289,7 +289,7 @@ describe('transformError', () => {
       },
       message: 'Request failed',
       config: { url: '/api/tasks' },
-    } as unknown as AxiosError<ApiErrorResponse>;
+    } as unknown as AxiosError<ErrorResponse>;
 
     const error = transformError(axiosError);
 
@@ -309,7 +309,7 @@ describe('transformError', () => {
       },
       message: 'Request failed with status code 500',
       config: { url: '/api/tasks' },
-    } as unknown as AxiosError<ApiErrorResponse>;
+    } as unknown as AxiosError<ErrorResponse>;
 
     const error = transformError(axiosError);
 
@@ -329,7 +329,7 @@ describe('transformError', () => {
       },
       message: 'Request failed',
       config: undefined,
-    } as unknown as AxiosError<ApiErrorResponse>;
+    } as unknown as AxiosError<ErrorResponse>;
 
     const error = transformError(axiosError);
 
@@ -345,7 +345,7 @@ describe('transformError', () => {
       },
       message: '',
       config: { url: '/api/tasks' },
-    } as unknown as AxiosError<ApiErrorResponse>;
+    } as unknown as AxiosError<ErrorResponse>;
 
     const error = transformError(axiosError);
 

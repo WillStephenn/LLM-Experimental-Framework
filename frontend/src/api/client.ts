@@ -11,27 +11,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios';
-
-/**
- * Field-level validation error structure.
- */
-export interface FieldError {
-  field: string;
-  message: string;
-}
-
-/**
- * Standard API error response structure from the backend.
- * Matches the ErrorResponse structure defined in API-Contract.md
- */
-export interface ApiErrorResponse {
-  timestamp: string;
-  status: number;
-  error: string;
-  message: string;
-  path: string;
-  fieldErrors?: FieldError[];
-}
+import { type ErrorResponse, type FieldError } from '@/types';
 
 /**
  * Custom error class for API errors with structured error data.
@@ -43,7 +23,7 @@ export class ApiError extends Error {
   public readonly timestamp: string;
   public readonly fieldErrors?: FieldError[];
 
-  constructor(errorResponse: ApiErrorResponse) {
+  constructor(errorResponse: ErrorResponse) {
     super(errorResponse.message);
     this.name = 'ApiError';
     this.status = errorResponse.status;
@@ -100,7 +80,7 @@ const createApiClient = (): AxiosInstance => {
     (response: AxiosResponse): AxiosResponse => {
       return response;
     },
-    (error: AxiosError<ApiErrorResponse>): Promise<never> => {
+    (error: AxiosError<ErrorResponse>): Promise<never> => {
       return Promise.reject(transformError(error));
     }
   );
@@ -120,7 +100,7 @@ export const isFormData = (data: unknown): data is FormData => {
  * Transform Axios error into a structured ApiError or preserve network errors.
  * @internal Exported for testing purposes
  */
-export const transformError = (error: AxiosError<ApiErrorResponse>): Error => {
+export const transformError = (error: AxiosError<ErrorResponse>): Error => {
   // Handle network errors (no response received)
   if (!error.response) {
     const networkError = new Error(
