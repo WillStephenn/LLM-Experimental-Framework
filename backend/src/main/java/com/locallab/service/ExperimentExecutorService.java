@@ -189,11 +189,13 @@ public class ExperimentExecutorService {
                 experimentRunRepository.findByExperimentIdOrderByIterationAsc(experimentId);
 
         int completedCount = completedRuns.size();
+        int failedCount =
+                (int) completedRuns.stream().filter(r -> r.getStatus() == RunStatus.FAILED).count();
         List<ExperimentRunConfig> remainingConfigs =
                 runConfigs.subList(completedCount, runConfigs.size());
 
         ExperimentExecutionState state =
-                createResumeState(experimentId, runConfigs, completedCount);
+                createResumeState(experimentId, runConfigs, completedCount, failedCount);
         logResumeInfo(experimentId, remainingConfigs.size(), runConfigs.size());
 
         if (remainingConfigs.isEmpty()) {
@@ -214,10 +216,14 @@ public class ExperimentExecutorService {
 
     /** Creates execution state for resume operation. */
     private ExperimentExecutionState createResumeState(
-            Long experimentId, List<ExperimentRunConfig> runConfigs, int completedCount) {
+            Long experimentId,
+            List<ExperimentRunConfig> runConfigs,
+            int completedCount,
+            int failedCount) {
         ExperimentExecutionState state = new ExperimentExecutionState(experimentId);
         state.setTotalRuns(runConfigs.size());
         state.setCompletedRuns(completedCount);
+        state.setFailedRuns(failedCount);
         executionStates.put(experimentId, state);
         return state;
     }
@@ -335,10 +341,8 @@ public class ExperimentExecutorService {
             ExperimentExecutionState state,
             ExperimentConfig config) {
 
-        int failedRuns = 0;
-
         for (ExperimentRunConfig runConfig : runConfigs) {
-            if (handlePauseOrCancel(experiment.getId(), state, failedRuns)) {
+            if (handlePauseOrCancel(experiment.getId(), state)) {
                 return;
             }
 
@@ -353,13 +357,13 @@ public class ExperimentExecutorService {
 
             state.setCompletedRuns(state.getCompletedRuns() + 1);
             if (run.getStatus() == RunStatus.FAILED) {
-                failedRuns++;
+                state.setFailedRuns(state.getFailedRuns() + 1);
             }
 
-            broadcastRunCompletionUpdates(experiment.getId(), run, state, failedRuns);
+            broadcastRunCompletionUpdates(experiment.getId(), run, state);
         }
 
-        completeExperiment(experiment.getId(), state, failedRuns);
+        completeExperiment(experiment.getId(), state);
     }
 
     /**
@@ -367,11 +371,9 @@ public class ExperimentExecutorService {
      *
      * @param experimentId the experiment ID
      * @param state the execution state
-     * @param failedRuns number of failed runs so far
      * @return true if execution should stop, false otherwise
      */
-    private boolean handlePauseOrCancel(
-            Long experimentId, ExperimentExecutionState state, int failedRuns) {
+    private boolean handlePauseOrCancel(Long experimentId, ExperimentExecutionState state) {
         if (state.isPaused()) {
             LOGGER.info("Experiment {} paused", experimentId);
             updateExperimentStatus(experimentId, ExperimentStatus.PAUSED);
@@ -384,12 +386,13 @@ public class ExperimentExecutorService {
         if (state.isCancelled()) {
             LOGGER.info("Experiment {} cancelled", experimentId);
             updateExperimentStatus(experimentId, ExperimentStatus.FAILED);
+            int successfulRuns = state.getCompletedRuns() - state.getFailedRuns();
             webSocketHandler.broadcastExperimentCompleted(
                     experimentId,
                     ExperimentStatus.FAILED,
                     state.getTotalRuns(),
-                    state.getCompletedRuns() - failedRuns,
-                    failedRuns,
+                    successfulRuns,
+                    state.getFailedRuns(),
                     null);
             executionStates.remove(experimentId);
             return true;
@@ -403,17 +406,16 @@ public class ExperimentExecutorService {
      * @param experimentId the experiment ID
      * @param run the completed run
      * @param state the execution state
-     * @param failedRuns number of failed runs
      */
     private void broadcastRunCompletionUpdates(
-            Long experimentId, ExperimentRun run, ExperimentExecutionState state, int failedRuns) {
+            Long experimentId, ExperimentRun run, ExperimentExecutionState state) {
         webSocketHandler.broadcastRunCompleted(experimentId, run);
         webSocketHandler.broadcastProgress(
                 experimentId,
                 state.getTotalRuns(),
                 state.getCompletedRuns(),
-                failedRuns,
-                run.getId(),
+                state.getFailedRuns(),
+                null,
                 null);
     }
 
@@ -422,18 +424,17 @@ public class ExperimentExecutorService {
      *
      * @param experimentId the experiment ID
      * @param state the execution state
-     * @param failedRuns number of failed runs
      */
-    private void completeExperiment(
-            Long experimentId, ExperimentExecutionState state, int failedRuns) {
+    private void completeExperiment(Long experimentId, ExperimentExecutionState state) {
         LOGGER.info("Experiment {} completed successfully", experimentId);
         updateExperimentStatus(experimentId, ExperimentStatus.COMPLETED);
+        int successfulRuns = state.getCompletedRuns() - state.getFailedRuns();
         webSocketHandler.broadcastExperimentCompleted(
                 experimentId,
                 ExperimentStatus.COMPLETED,
                 state.getTotalRuns(),
-                state.getCompletedRuns() - failedRuns,
-                failedRuns,
+                successfulRuns,
+                state.getFailedRuns(),
                 null);
         executionStates.remove(experimentId);
     }

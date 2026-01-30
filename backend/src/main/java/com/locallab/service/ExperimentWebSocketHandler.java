@@ -76,7 +76,7 @@ public class ExperimentWebSocketHandler {
      * @param totalRuns the total number of runs to execute
      * @param completedRuns the number of runs that have completed
      * @param failedRuns the number of runs that have failed
-     * @param currentRunId the ID of the currently executing run (may be null)
+     * @param currentRunId the ID of the next run to execute (typically null after run completion)
      * @param estimatedTimeRemainingMs estimated time remaining in milliseconds (may be null)
      */
     public void broadcastProgress(

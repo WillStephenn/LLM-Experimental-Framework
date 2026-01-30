@@ -63,9 +63,10 @@ public class ProgressPayload {
     private double percentComplete;
 
     /**
-     * The identifier of the currently executing run.
+     * The identifier of the next run about to be executed.
      *
-     * <p>May be null if no run is currently in progress (e.g., between runs).
+     * <p>Typically null in progress messages sent after a run completes, as the next run has not
+     * yet started. May be set when broadcasting progress at the start of a run.
      */
     private Long currentRunId;
 

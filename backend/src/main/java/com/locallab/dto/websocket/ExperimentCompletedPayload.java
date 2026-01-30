@@ -44,9 +44,11 @@ public class ExperimentCompletedPayload {
     private ExperimentStatus finalStatus;
 
     /**
-     * The total number of runs in the experiment.
+     * The total number of runs originally planned for the experiment.
      *
-     * <p>Equals successfulRuns + failedRuns.
+     * <p>This represents the intended total from the experiment configuration (models x embeddings
+     * x iterations). When an experiment is cancelled, this may be greater than successfulRuns +
+     * failedRuns since not all planned runs were executed.
      */
     private int totalRuns;
 

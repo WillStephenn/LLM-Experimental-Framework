@@ -68,6 +68,14 @@ public class ExperimentExecutionState {
     private volatile int completedRuns;
 
     /**
+     * The number of runs that have failed.
+     *
+     * <p>Tracks failures across execution sessions (including resumed experiments). Marked as
+     * volatile for thread-safe visibility.
+     */
+    private volatile int failedRuns;
+
+    /**
      * The total number of runs to be executed.
      *
      * <p>Calculated from the run configuration matrix (models x embeddings x iterations). Set once
@@ -85,6 +93,7 @@ public class ExperimentExecutionState {
         this.paused = false;
         this.cancelled = false;
         this.completedRuns = 0;
+        this.failedRuns = 0;
         this.totalRuns = 0;
     }
 }
