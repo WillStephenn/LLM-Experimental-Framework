@@ -1,31 +1,8 @@
 import { create } from 'zustand';
+import type { HyperparametersState, ConfigState } from '@/types';
 
-/**
- * Hyperparameters for model configuration.
- * Matches the validation constraints from the API contract.
- */
-export interface Hyperparameters {
-  /** Controls randomness (0.0 - 2.0) */
-  temperature: number;
-  /** Nucleus sampling threshold (0.0 - 1.0) */
-  topP: number;
-  /** Top-k sampling limit (1 - 100) */
-  topK: number;
-  /** Context window size (512 - 128000) */
-  contextWindow: number;
-  /** Maximum tokens to generate (null = no limit) */
-  maxTokens: number | null;
-}
-
-/**
- * Global configuration state shape.
- */
-export interface ConfigState {
-  /** Currently selected model name */
-  model: string | null;
-  /** Hyperparameter configuration */
-  hyperparameters: Hyperparameters;
-}
+// Re-export types for backward compatibility
+export type { HyperparametersState, ConfigState, Hyperparameters } from '@/types';
 
 /**
  * Actions for updating configuration state.
@@ -50,7 +27,7 @@ export interface ConfigActions {
 /**
  * Default hyperparameters matching API contract defaults.
  */
-export const DEFAULT_HYPERPARAMETERS: Hyperparameters = {
+export const DEFAULT_HYPERPARAMETERS: HyperparametersState = {
   temperature: 0.7,
   topP: 0.9,
   topK: 40,

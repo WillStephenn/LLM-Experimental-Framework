@@ -112,6 +112,7 @@ export interface FieldError {
 
 /**
  * Hyperparameters controlling model generation behaviour.
+ * All fields are optional for API requests (defaults applied server-side).
  */
 export interface Hyperparameters {
   /** Controls randomness in generation (0.0 to 2.0). */
@@ -124,6 +125,33 @@ export interface Hyperparameters {
   contextWindow?: number;
   /** Maximum number of tokens to generate. */
   maxTokens?: number;
+}
+
+/**
+ * Hyperparameters state with all required fields.
+ * Used for storing current configuration values in the application state.
+ */
+export interface HyperparametersState {
+  /** Controls randomness in generation (0.0 to 2.0). */
+  temperature: number;
+  /** Nucleus sampling probability threshold (0.0 to 1.0). */
+  topP: number;
+  /** Top-k sampling parameter (1 to 100). */
+  topK: number;
+  /** Context window size in tokens (512 to 128000). */
+  contextWindow: number;
+  /** Maximum number of tokens to generate (null = no limit). */
+  maxTokens: number | null;
+}
+
+/**
+ * Global configuration state shape for the config store.
+ */
+export interface ConfigState {
+  /** Currently selected model name. */
+  model: string | null;
+  /** Hyperparameter configuration. */
+  hyperparameters: HyperparametersState;
 }
 
 // ============================================================================
