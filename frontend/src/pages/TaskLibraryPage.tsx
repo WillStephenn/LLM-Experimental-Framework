@@ -17,12 +17,14 @@ type ModalState =
   | { type: 'edit-prompt'; prompt: SystemPromptResponse }
   | { type: 'delete-prompt'; prompt: SystemPromptResponse };
 
+const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+});
+
 const formatDate = (value: string): string => {
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(value));
+  return dateFormatter.format(new Date(value));
 };
 
 const parseTags = (tags: string | null): string[] => {
@@ -108,8 +110,7 @@ export function TaskLibraryPage(): React.JSX.Element {
     try {
       if (modalState.type === 'delete-task') {
         await deleteTask(modalState.task.id);
-      }
-      if (modalState.type === 'delete-prompt') {
+      } else if (modalState.type === 'delete-prompt') {
         await deleteSystemPrompt(modalState.prompt.id);
       }
       closeModal();
@@ -160,6 +161,7 @@ export function TaskLibraryPage(): React.JSX.Element {
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredTasks.map((task) => {
               const tags = parseTags(task.tags);
+              const description = task.description ?? 'No description provided';
               return (
                 <tr
                   key={task.id}
@@ -168,8 +170,8 @@ export function TaskLibraryPage(): React.JSX.Element {
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div className="font-medium text-gray-900">{task.name}</div>
-                    <div className="text-xs text-gray-500 truncate max-w-xs">
-                      {task.description ?? 'No description provided'}
+                    <div className="text-xs text-gray-500 truncate max-w-xs" title={description}>
+                      {description}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -258,7 +260,7 @@ export function TaskLibraryPage(): React.JSX.Element {
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <div className="font-medium text-gray-900">{prompt.alias}</div>
-                  <div className="text-xs text-gray-500 truncate max-w-xs">
+                  <div className="text-xs text-gray-500 truncate max-w-xs" title={prompt.content}>
                     {prompt.content}
                   </div>
                 </td>

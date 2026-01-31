@@ -157,7 +157,7 @@ describe('TaskLibraryPage', () => {
     expect(screen.queryByTestId('task-row-2')).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByTestId('task-library-search'), {
-      target: { value: 'summarise' },
+      target: { value: 'Summarisation' },
     });
     expect(screen.queryByTestId('task-row-1')).not.toBeInTheDocument();
     expect(screen.queryByTestId('task-row-2')).not.toBeInTheDocument();
