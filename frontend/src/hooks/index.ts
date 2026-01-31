@@ -31,5 +31,12 @@ export type {
   UseExperimentControlReturn,
 } from './useExperimentControl';
 
+export { useLeaderboard } from './useLeaderboard';
+export type {
+  UseLeaderboardActions,
+  UseLeaderboardReturn,
+  UseLeaderboardState,
+} from './useLeaderboard';
+
 // Re-export ApiError for convenience
 export { ApiError } from '@/api/client';
