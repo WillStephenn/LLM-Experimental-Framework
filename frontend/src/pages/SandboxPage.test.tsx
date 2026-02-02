@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SandboxPage } from './SandboxPage';
 import { useGenerate } from '@/hooks/useOllama';
+import { useTasks } from '@/hooks/useTasks';
 import { useConfigStore, DEFAULT_CONFIG_STATE, DEFAULT_HYPERPARAMETERS } from '@/store/configStore';
 import type { GenerationResponse } from '@/types';
 
@@ -57,7 +58,23 @@ vi.mock(
   })
 );
 
+vi.mock('@/hooks/useTasks', () => ({
+  useTasks: vi.fn(() => ({
+    tasks: [],
+    task: null,
+    isLoading: false,
+    error: null,
+    fetchTasks: vi.fn(),
+    fetchTask: vi.fn(),
+    createTask: vi.fn(),
+    updateTask: vi.fn(),
+    deleteTask: vi.fn(),
+    clearError: vi.fn(),
+  })),
+}));
+
 const mockUseGenerate = vi.mocked(useGenerate);
+const mockUseTasks = vi.mocked(useTasks);
 
 const mockGenerationResponse: GenerationResponse = {
   response: 'Hello from the assistant.',
@@ -71,6 +88,7 @@ const mockGenerationResponse: GenerationResponse = {
 
 describe('SandboxPage', () => {
   const mockGenerate = vi.fn();
+  const mockCreateTask = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -86,6 +104,18 @@ describe('SandboxPage', () => {
       error: null,
       generate: mockGenerate,
       reset: vi.fn(),
+    });
+    mockUseTasks.mockReturnValue({
+      tasks: [],
+      task: null,
+      isLoading: false,
+      error: null,
+      fetchTasks: vi.fn(),
+      fetchTask: vi.fn(),
+      createTask: mockCreateTask,
+      updateTask: vi.fn(),
+      deleteTask: vi.fn(),
+      clearError: vi.fn(),
     });
   });
 
@@ -198,5 +228,77 @@ describe('SandboxPage', () => {
     fireEvent.click(screen.getByTestId('sandbox-send-button'));
 
     expect(await screen.findByTestId('sandbox-error')).toHaveTextContent('Generation failed');
+  });
+
+  it('includes jsonMode in generation request when enabled', () => {
+    render(<SandboxPage />);
+
+    fireEvent.click(screen.getByTestId('sandbox-json-toggle'));
+    fireEvent.change(screen.getByTestId('sandbox-prompt-input'), {
+      target: { value: 'Return JSON' },
+    });
+    fireEvent.click(screen.getByTestId('sandbox-send-button'));
+
+    expect(mockGenerate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'llama3:8b',
+        prompt: 'Return JSON',
+        jsonMode: true,
+      })
+    );
+  });
+
+  it('saves assistant responses as task templates', async () => {
+    mockCreateTask.mockResolvedValue({
+      id: 1,
+      name: 'Sandbox Response 30/01/2026, 20:00:00',
+      description: 'Generated from model llama3:8b.',
+      promptTemplate: 'Hello from the assistant.',
+      tags: null,
+      evaluationNotes: null,
+      createdAt: '2026-01-30T20:00:00Z',
+    });
+
+    render(<SandboxPage />);
+
+    fireEvent.change(screen.getByTestId('sandbox-prompt-input'), {
+      target: { value: 'Hello there' },
+    });
+    fireEvent.click(screen.getByTestId('sandbox-send-button'));
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('sandbox-message-assistant')).toHaveLength(1);
+    });
+
+    fireEvent.click(screen.getByTestId('sandbox-save-task'));
+
+    await waitFor(() => {
+      expect(mockCreateTask).toHaveBeenCalledWith(
+        expect.objectContaining({
+          promptTemplate: 'Hello from the assistant.',
+        })
+      );
+    });
+    expect(screen.getByTestId('sandbox-task-status')).toHaveTextContent(
+      'Saved to Task Library.'
+    );
+  });
+
+  it('clears history when clear button is clicked', async () => {
+    render(<SandboxPage />);
+
+    fireEvent.change(screen.getByTestId('sandbox-prompt-input'), {
+      target: { value: 'Hello there' },
+    });
+    fireEvent.click(screen.getByTestId('sandbox-send-button'));
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('sandbox-message-user')).toHaveLength(1);
+      expect(screen.getAllByTestId('sandbox-message-assistant')).toHaveLength(1);
+    });
+
+    fireEvent.click(screen.getByTestId('sandbox-clear-history'));
+
+    expect(screen.getByTestId('sandbox-empty-state')).toBeInTheDocument();
   });
 });

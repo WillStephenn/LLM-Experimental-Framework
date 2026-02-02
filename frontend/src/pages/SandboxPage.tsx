@@ -4,8 +4,15 @@
  * Interactive playground for experimenting with models in real-time.
  */
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { ConfigPanel, MetricsDisplay, type GenerationMetrics } from '@/components/common';
+import {
+  CodeBlock,
+  ConfigPanel,
+  MetricsDisplay,
+  type SupportedLanguage,
+  type GenerationMetrics,
+} from '@/components/common';
 import { useGenerate } from '@/hooks/useOllama';
+import { useTasks } from '@/hooks/useTasks';
 import { useConfigStore } from '@/store/configStore';
 import type { GenerationRequest, GenerationResponse } from '@/types';
 
@@ -17,6 +24,7 @@ interface ChatMessage {
   content: string;
   metrics?: GenerationMetrics;
   timestamp: string;
+  isJson?: boolean;
 }
 
 const createMessageId = (): string => {
@@ -37,10 +45,13 @@ const buildMetrics = (response: GenerationResponse): GenerationMetrics => ({
 export function SandboxPage(): React.JSX.Element {
   const { model, hyperparameters } = useConfigStore();
   const { generate, isLoading } = useGenerate();
+  const { createTask } = useTasks();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [prompt, setPrompt] = useState('');
   const [systemPrompt, setSystemPrompt] = useState('');
   const [systemPromptId, setSystemPromptId] = useState<number | null>(null);
+  const [jsonMode, setJsonMode] = useState(false);
+  const [taskTemplateStatus, setTaskTemplateStatus] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 
@@ -99,6 +110,7 @@ export function SandboxPage(): React.JSX.Element {
       topK: hyperparameters.topK,
       contextWindow: hyperparameters.contextWindow,
       maxTokens: hyperparameters.maxTokens ?? undefined,
+      jsonMode,
     };
 
     try {
@@ -111,6 +123,7 @@ export function SandboxPage(): React.JSX.Element {
           content: response.response,
           metrics: buildMetrics(response),
           timestamp: new Date().toISOString(),
+          isJson: jsonMode,
         };
         setMessages((prev) => {
           const updated = [...prev, assistantMessage];
@@ -131,6 +144,60 @@ export function SandboxPage(): React.JSX.Element {
       const submittedValue = event.currentTarget.value;
       void handleSend(submittedValue);
     }
+  };
+
+  const handleSaveAsTaskTemplate = async (message: ChatMessage): Promise<void> => {
+    if (message.role !== 'assistant') {
+      return;
+    }
+    setTaskTemplateStatus(null);
+    try {
+      await createTask({
+        name: `Sandbox Response ${new Date().toLocaleString('en-GB')}`,
+        description: `Generated from model ${model ?? 'Unknown model'}.`,
+        promptTemplate: message.content,
+      });
+      setTaskTemplateStatus('Saved to Task Library.');
+    } catch (taskError) {
+      const errorText =
+        taskError instanceof Error ? taskError.message : 'Unable to save task template.';
+      setTaskTemplateStatus(errorText);
+    }
+  };
+
+  const handleClearHistory = (): void => {
+    setMessages([]);
+    setTaskTemplateStatus(null);
+    setErrorMessage(null);
+  };
+
+  const handleJsonModeToggle = (): void => {
+    setJsonMode((prev) => !prev);
+  };
+
+  const renderAssistantContent = (message: ChatMessage): React.JSX.Element => {
+    const trimmed = message.content.trim();
+    if (!trimmed) {
+      return <span className="whitespace-pre-wrap">{message.content}</span>;
+    }
+    if (message.isJson) {
+      return (
+        <CodeBlock code={trimmed} language="json" data-testid="sandbox-json-response" />
+      );
+    }
+    const codeBlockPattern = /```([a-zA-Z]+)?\n([\s\S]*?)```/;
+    const codeBlockMatch = codeBlockPattern.exec(trimmed);
+    if (codeBlockMatch) {
+      const language = (codeBlockMatch[1]?.toLowerCase() || 'plaintext') as SupportedLanguage;
+      return (
+        <CodeBlock
+          code={codeBlockMatch[2].trim()}
+          language={language}
+          data-testid="sandbox-code-block"
+        />
+      );
+    }
+    return <span className="whitespace-pre-wrap">{message.content}</span>;
   };
 
   return (
@@ -155,6 +222,34 @@ export function SandboxPage(): React.JSX.Element {
               <div>Model: {modelLabel}</div>
               <div>System prompt: {systemPromptLabel}</div>
             </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-gray-600">JSON mode</span>
+              <button
+                type="button"
+                onClick={handleJsonModeToggle}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
+                  jsonMode ? 'bg-brand-green' : 'bg-gray-200'
+                }`}
+                aria-pressed={jsonMode}
+                data-testid="sandbox-json-toggle"
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 ${
+                    jsonMode ? 'translate-x-5' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={handleClearHistory}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+              data-testid="sandbox-clear-history"
+            >
+              Clear history
+            </button>
           </div>
 
           <div
@@ -183,14 +278,28 @@ export function SandboxPage(): React.JSX.Element {
                       {isUser ? 'You' : 'Assistant'}
                     </span>
                     <div
-                      className={`max-w-[80%] rounded-lg px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                      className={`max-w-[80%] rounded-lg px-4 py-3 text-sm leading-relaxed ${
                         isUser
                           ? 'bg-brand-green text-white'
                           : 'bg-gray-50 border border-gray-200 text-gray-900'
                       }`}
                     >
-                      {message.content}
+                      {isUser ? (
+                        <span className="whitespace-pre-wrap">{message.content}</span>
+                      ) : (
+                        renderAssistantContent(message)
+                      )}
                     </div>
+                    {!isUser && (
+                      <button
+                        type="button"
+                        onClick={() => void handleSaveAsTaskTemplate(message)}
+                        className="mt-2 text-xs font-medium text-brand-green hover:text-brand-green-dark transition-colors duration-200"
+                        data-testid="sandbox-save-task"
+                      >
+                        Save as Task Template
+                      </button>
+                    )}
                     {!isUser && message.metrics && (
                       <MetricsDisplay
                         metrics={message.metrics}
@@ -212,6 +321,14 @@ export function SandboxPage(): React.JSX.Element {
                 data-testid="sandbox-error"
               >
                 {errorMessage}
+              </div>
+            )}
+            {taskTemplateStatus && (
+              <div
+                className="text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-md px-3 py-2"
+                data-testid="sandbox-task-status"
+              >
+                {taskTemplateStatus}
               </div>
             )}
             <div className="space-y-2">
