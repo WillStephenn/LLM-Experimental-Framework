@@ -230,7 +230,7 @@ describe('SandboxPage', () => {
     expect(await screen.findByTestId('sandbox-error')).toHaveTextContent('Generation failed');
   });
 
-  it('includes jsonMode in generation request when enabled', async () => {
+  it('includes jsonMode in generation request when enabled', () => {
     render(<SandboxPage />);
 
     fireEvent.click(screen.getByTestId('sandbox-json-toggle'));

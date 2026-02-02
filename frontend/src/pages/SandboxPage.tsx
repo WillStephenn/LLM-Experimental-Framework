@@ -185,7 +185,8 @@ export function SandboxPage(): React.JSX.Element {
         <CodeBlock code={trimmed} language="json" data-testid="sandbox-json-response" />
       );
     }
-    const codeBlockMatch = trimmed.match(/```([a-zA-Z]+)?\n([\s\S]*?)```/);
+    const codeBlockPattern = /```([a-zA-Z]+)?\n([\s\S]*?)```/;
+    const codeBlockMatch = codeBlockPattern.exec(trimmed);
     if (codeBlockMatch) {
       const language = (codeBlockMatch[1]?.toLowerCase() || 'plaintext') as SupportedLanguage;
       return (

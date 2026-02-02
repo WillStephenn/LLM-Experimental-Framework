@@ -30,9 +30,9 @@ import io.github.ollama4j.exceptions.OllamaBaseException;
 import io.github.ollama4j.models.embeddings.OllamaEmbedRequestModel;
 import io.github.ollama4j.models.embeddings.OllamaEmbedResponseModel;
 import io.github.ollama4j.models.generate.OllamaGenerateRequest;
+import io.github.ollama4j.models.request.OllamaGenerateEndpointCaller;
 import io.github.ollama4j.models.response.Model;
 import io.github.ollama4j.models.response.OllamaResult;
-import io.github.ollama4j.models.request.OllamaGenerateEndpointCaller;
 import io.github.ollama4j.utils.Options;
 
 /**
@@ -360,8 +360,11 @@ class OllamaClientImplTest {
             // Assert
             assertEquals("{\"status\":\"ok\"}", response.getResponse());
             verify(generateCaller)
-                    .callSync(argThat(generateRequest -> Boolean.TRUE.equals(
-                            generateRequest.getReturnFormatJson())));
+                    .callSync(
+                            argThat(
+                                    generateRequest ->
+                                            Boolean.TRUE.equals(
+                                                    generateRequest.getReturnFormatJson())));
         }
     }
 

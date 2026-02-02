@@ -98,9 +98,7 @@ public class OllamaClientImpl implements OllamaClient {
     }
 
     OllamaClientImpl(
-            OllamaConfig config,
-            OllamaAPI ollamaApi,
-            OllamaGenerateEndpointCaller generateCaller) {
+            OllamaConfig config, OllamaAPI ollamaApi, OllamaGenerateEndpointCaller generateCaller) {
         this.config = config;
         this.ollamaApi = ollamaApi;
         this.generateCaller = generateCaller;
@@ -126,10 +124,7 @@ public class OllamaClientImpl implements OllamaClient {
      */
     private OllamaGenerateEndpointCaller createGenerateCaller(OllamaConfig config) {
         return new OllamaGenerateEndpointCaller(
-                config.getBaseUrl(),
-                null,
-                config.getTimeoutSeconds(),
-                false);
+                config.getBaseUrl(), null, config.getTimeoutSeconds(), false);
     }
 
     @Override
