@@ -74,8 +74,7 @@ export function TaskLibraryPage(): React.JSX.Element {
         task.name.toLowerCase().includes(normalisedSearch) ||
         (task.description ?? '').toLowerCase().includes(normalisedSearch);
       const taskTags = parseTags(task.tags).map((tag) => tag.toLowerCase());
-      const matchesTag =
-        normalisedTag === 'all' || taskTags.some((tag) => tag === normalisedTag);
+      const matchesTag = normalisedTag === 'all' || taskTags.some((tag) => tag === normalisedTag);
       return matchesSearch && matchesTag;
     });
   }, [searchValue, tagFilter, tasks]);
@@ -132,9 +131,7 @@ export function TaskLibraryPage(): React.JSX.Element {
             0
           </div>
           <h3 className="mt-4 text-lg font-medium text-gray-900">No task templates found</h3>
-          <p className="mt-2 text-sm text-gray-500">
-            Try adjusting your search or tag filters.
-          </p>
+          <p className="mt-2 text-sm text-gray-500">Try adjusting your search or tag filters.</p>
         </div>
       );
     }
@@ -293,8 +290,7 @@ export function TaskLibraryPage(): React.JSX.Element {
     );
   };
 
-  const isDeleteModal =
-    modalState?.type === 'delete-task' || modalState?.type === 'delete-prompt';
+  const isDeleteModal = modalState?.type === 'delete-task' || modalState?.type === 'delete-prompt';
   const modalTitle = useMemo(() => {
     if (!modalState) {
       return '';
@@ -327,7 +323,10 @@ export function TaskLibraryPage(): React.JSX.Element {
         onValueChange={(value) => setActiveTab(value as LibraryTab)}
         className="space-y-6"
       >
-        <Tabs.List className="inline-flex rounded-lg bg-gray-100 p-1" aria-label="Task library tabs">
+        <Tabs.List
+          className="inline-flex rounded-lg bg-gray-100 p-1"
+          aria-label="Task library tabs"
+        >
           <Tabs.Trigger
             value="tasks"
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -426,10 +425,7 @@ export function TaskLibraryPage(): React.JSX.Element {
         >
           <div className="bg-white rounded-lg shadow-lg w-full max-w-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2
-                id="task-library-modal-title"
-                className="text-xl font-semibold text-gray-900"
-              >
+              <h2 id="task-library-modal-title" className="text-xl font-semibold text-gray-900">
                 {modalTitle}
               </h2>
             </div>

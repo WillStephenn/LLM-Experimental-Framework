@@ -4,59 +4,61 @@ import userEvent from '@testing-library/user-event';
 import { TaskLibraryPage } from './TaskLibraryPage';
 import type { TaskTemplateResponse, SystemPromptResponse } from '@/types';
 
-const taskLibraryMocks = vi.hoisted((): {
-  mockTasks: TaskTemplateResponse[];
-  mockSystemPrompts: SystemPromptResponse[];
-  fetchTasks: ReturnType<typeof vi.fn>;
-  fetchSystemPrompts: ReturnType<typeof vi.fn>;
-  deleteTask: ReturnType<typeof vi.fn>;
-  deleteSystemPrompt: ReturnType<typeof vi.fn>;
-} => {
-  const mockTasks: TaskTemplateResponse[] = [
-    {
-      id: 1,
-      name: 'Code Review Task',
-      description: 'Review a small code snippet.',
-      promptTemplate: 'Review this code.',
-      tags: 'code,review',
-      evaluationNotes: null,
-      createdAt: '2025-01-10T10:00:00.000Z',
-    },
-    {
-      id: 2,
-      name: 'Summarisation Task',
-      description: 'Summarise the content.',
-      promptTemplate: 'Summarise the following.',
-      tags: 'summary',
-      evaluationNotes: null,
-      createdAt: '2025-01-12T10:00:00.000Z',
-    },
-  ];
+const taskLibraryMocks = vi.hoisted(
+  (): {
+    mockTasks: TaskTemplateResponse[];
+    mockSystemPrompts: SystemPromptResponse[];
+    fetchTasks: ReturnType<typeof vi.fn>;
+    fetchSystemPrompts: ReturnType<typeof vi.fn>;
+    deleteTask: ReturnType<typeof vi.fn>;
+    deleteSystemPrompt: ReturnType<typeof vi.fn>;
+  } => {
+    const mockTasks: TaskTemplateResponse[] = [
+      {
+        id: 1,
+        name: 'Code Review Task',
+        description: 'Review a small code snippet.',
+        promptTemplate: 'Review this code.',
+        tags: 'code,review',
+        evaluationNotes: null,
+        createdAt: '2025-01-10T10:00:00.000Z',
+      },
+      {
+        id: 2,
+        name: 'Summarisation Task',
+        description: 'Summarise the content.',
+        promptTemplate: 'Summarise the following.',
+        tags: 'summary',
+        evaluationNotes: null,
+        createdAt: '2025-01-12T10:00:00.000Z',
+      },
+    ];
 
-  const mockSystemPrompts: SystemPromptResponse[] = [
-    {
-      id: 11,
-      alias: 'assistant',
-      content: 'You are a helpful assistant.',
-      createdAt: '2025-01-05T10:00:00.000Z',
-    },
-    {
-      id: 12,
-      alias: 'reviewer',
-      content: 'Review code with care.',
-      createdAt: '2025-01-06T10:00:00.000Z',
-    },
-  ];
+    const mockSystemPrompts: SystemPromptResponse[] = [
+      {
+        id: 11,
+        alias: 'assistant',
+        content: 'You are a helpful assistant.',
+        createdAt: '2025-01-05T10:00:00.000Z',
+      },
+      {
+        id: 12,
+        alias: 'reviewer',
+        content: 'Review code with care.',
+        createdAt: '2025-01-06T10:00:00.000Z',
+      },
+    ];
 
-  return {
-    mockTasks,
-    mockSystemPrompts,
-    fetchTasks: vi.fn(),
-    fetchSystemPrompts: vi.fn(),
-    deleteTask: vi.fn(),
-    deleteSystemPrompt: vi.fn(),
-  };
-});
+    return {
+      mockTasks,
+      mockSystemPrompts,
+      fetchTasks: vi.fn(),
+      fetchSystemPrompts: vi.fn(),
+      deleteTask: vi.fn(),
+      deleteSystemPrompt: vi.fn(),
+    };
+  }
+);
 
 vi.mock('@/hooks/useTasks', (): { useTasks: () => ReturnType<typeof buildTasksHook> } => {
   const buildTasksHook = (): {
