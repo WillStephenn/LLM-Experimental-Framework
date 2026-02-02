@@ -4,7 +4,8 @@
  * View and analyse experiment results.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Leaderboard, leaderboardDefaults } from '@/components/results/Leaderboard';
+import { Leaderboard } from '@/components/results/Leaderboard';
+import { leaderboardDefaults } from '@/components/results/leaderboardDefaults';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import type { LeaderboardFilter } from '@/types';
 
@@ -27,11 +28,11 @@ const downloadFile = (filename: string, content: string, type: string): void => 
 };
 
 export function ResultsDashboardPage(): React.JSX.Element {
-  const [filters, setFilters] = useState<LeaderboardFilter>({ ...leaderboardDefaults });
+  const [filters, setFilters] = useState<LeaderboardFilter>(() => ({ ...leaderboardDefaults }));
   const { leaderboard, isLoading, error, fetchLeaderboard, refresh, clearError } = useLeaderboard();
 
   useEffect(() => {
-    fetchLeaderboard(filters).catch(() => {
+    void fetchLeaderboard(filters).catch(() => {
       // Error handled in state
     });
   }, [fetchLeaderboard, filters]);
@@ -90,7 +91,9 @@ export function ResultsDashboardPage(): React.JSX.Element {
               </button>
               <button
                 type="button"
-                onClick={refresh}
+                onClick={() => {
+                  void refresh();
+                }}
                 className="bg-brand-green hover:bg-brand-green-dark text-white font-medium px-4 py-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2"
               >
                 Retry

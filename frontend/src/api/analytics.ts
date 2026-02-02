@@ -14,9 +14,7 @@ import type { LeaderboardFilter, LeaderboardResponse } from '@/types';
  * @param filters - Optional leaderboard filters
  * @returns Leaderboard response data
  */
-export const getLeaderboard = async (
-  filters?: LeaderboardFilter
-): Promise<LeaderboardResponse> => {
+export const getLeaderboard = async (filters?: LeaderboardFilter): Promise<LeaderboardResponse> => {
   const params = new URLSearchParams();
 
   if (filters?.experimentId !== undefined) {

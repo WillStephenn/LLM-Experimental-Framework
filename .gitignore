@@ -45,6 +45,8 @@ backend/data/
 # ===========================
 # Experiment outputs may contain personal or sensitive information
 results/
+!frontend/src/components/results/
+!frontend/src/components/results/**
 exports/
 output/
 *.csv

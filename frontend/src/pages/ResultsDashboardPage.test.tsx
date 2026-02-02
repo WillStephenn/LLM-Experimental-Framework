@@ -34,7 +34,7 @@ describe('ResultsDashboardPage', () => {
       leaderboard: mockLeaderboard,
       isLoading: false,
       error: null,
-      fetchLeaderboard: vi.fn(),
+      fetchLeaderboard: vi.fn().mockResolvedValue(mockLeaderboard),
       refresh: vi.fn(),
       clearError: vi.fn(),
     });
@@ -51,7 +51,7 @@ describe('ResultsDashboardPage', () => {
       leaderboard: mockLeaderboard,
       isLoading: false,
       error: null,
-      fetchLeaderboard: vi.fn(),
+      fetchLeaderboard: vi.fn().mockResolvedValue(mockLeaderboard),
       refresh: vi.fn(),
       clearError: vi.fn(),
     });
@@ -67,7 +67,7 @@ describe('ResultsDashboardPage', () => {
       leaderboard: null,
       isLoading: true,
       error: null,
-      fetchLeaderboard: vi.fn(),
+      fetchLeaderboard: vi.fn().mockResolvedValue(mockLeaderboard),
       refresh: vi.fn(),
       clearError: vi.fn(),
     });
@@ -82,7 +82,7 @@ describe('ResultsDashboardPage', () => {
       leaderboard: null,
       isLoading: false,
       error: new Error('Unable to load leaderboard'),
-      fetchLeaderboard: vi.fn(),
+      fetchLeaderboard: vi.fn().mockResolvedValue(mockLeaderboard),
       refresh: vi.fn(),
       clearError: vi.fn(),
     });
